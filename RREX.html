@@ -556,7 +556,7 @@
                 });
 
                 const hoursScanned = SIMULATION_HOURS * progress;
-                const iah = hoursScanned > 0 ? eventsDetected * 100 / hoursScanned : 0;
+                const iah = hoursScanned > eventsDetected  / hoursScanned : 0;
                 
                 iahValueEl.textContent = iah.toFixed(1);
                 apneaCountEl.textContent = eventsDetected;
