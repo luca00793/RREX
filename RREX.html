@@ -150,6 +150,73 @@
                 text-align: center;
                 box-sizing: border-box; /* S'assure que le padding ne casse pas la largeur */
             }
+            /* --- BLOC DE CODE POUR L'ADAPTABILITÉ MOBILE --- */
+
+            /* Applique ces styles uniquement si la largeur de l'écran est de 768px ou moins */
+            @media (max-width: 768px) {
+                .container {
+                    padding: 10px; /* Réduit les marges globales pour maximiser l'espace */
+                }
+            
+                .main-title h1 {
+                    font-size: 1.8em; /* Réduit la taille du titre principal */
+                }
+            
+                .main-title p {
+                    font-size: 0.9em;
+                    letter-spacing: 1px;
+                }
+                
+                .interface-header, .interface-footer {
+                    padding: 5px 10px;
+                    font-size: 0.7em; /* Réduit la taille du texte dans le header/footer */
+                }
+                
+                /* Empile le moniteur biométrique verticalement */
+                #biometrics-monitor {
+                    flex-direction: column; 
+                    gap: 15px;
+                    padding: 10px;
+                }
+            
+                .monitor-analysis {
+                    border-left: none; /* Supprime la bordure latérale */
+                    padding-left: 0;
+                    border-top: 1px solid var(--secondary-blue); /* Ajoute une bordure de séparation en haut */
+                    padding-top: 15px;
+                    margin-top: 15px;
+                }
+            
+                .monitor-header {
+                    flex-direction: column; /* Empile le titre et l'alerte du moniteur */
+                    gap: 10px;
+                    align-items: flex-start;
+                }
+            
+                .analysis-item span {
+                    font-size: 1.1em; /* Réduit légèrement la taille des chiffres de l'analyse */
+                }
+            
+                .camera-grid {
+                    gap: 15px; /* Réduit l'écart entre les "caméras" */
+                }
+                
+                /* Ajuste le contenu des pages pour les petits écrans */
+                .page-content {
+                    padding: 60px 15px; 
+                }
+                
+                .page-content h1 {
+                    font-size: 1.5em;
+                }
+            
+                /* Le bouton retour prend toute la largeur pour être facile à taper */
+                .back-button {
+                    width: 100%; 
+                    text-align: center;
+                    box-sizing: border-box; 
+                }
+            }
         }
     </style>
 </head>
