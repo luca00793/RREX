@@ -80,6 +80,77 @@
         .interview strong { color: var(--text-light); }
         .back-button { display: inline-block; margin-bottom: 30px; padding: 10px 20px; background: transparent; border: 1px solid var(--primary-blue); color: var(--primary-blue); font-family: 'Share Tech Mono', monospace; cursor: pointer; transition: background-color 0.3s, color 0.3s; text-transform: uppercase; }
         .back-button:hover { background-color: var(--primary-blue); color: var(--background-dark); box-shadow: 0 0 10px var(--glow-blue); }
+        /* --- BLOC DE CODE POUR L'ADAPTABILITÉ (RESPONSIVE DESIGN) --- */
+
+        /* Pour les tablettes et écrans de taille moyenne (en dessous de 1024px) */
+        @media (max-width: 1024px) {
+            #biometrics-monitor {
+                flex-direction: column; /* Empile le graphe et l'analyse verticalement */
+                gap: 15px;
+            }
+        
+            .monitor-analysis {
+                border-left: none; /* Supprime la bordure latérale */
+                padding-left: 0;
+                border-top: 1px solid var(--secondary-blue); /* Ajoute une bordure supérieure */
+                padding-top: 15px;
+                margin-top: 15px; /* Ajoute un peu d'espace */
+            }
+        }
+        
+        /* Pour les téléphones mobiles (en dessous de 768px) */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px; /* Réduit les marges globales */
+            }
+        
+            .main-title h1 {
+                font-size: 1.8em; /* Réduit la taille du titre principal */
+            }
+        
+            .main-title p {
+                font-size: 0.9em;
+                letter-spacing: 1px;
+            }
+            
+            .interface-header, .interface-footer {
+                padding: 5px 10px;
+                font-size: 0.7em; /* Réduit la taille du texte dans le header/footer */
+            }
+        
+            .page-content {
+                padding: 60px 15px; /* Ajuste le padding des pages de contenu */
+            }
+            
+            .page-content h1 {
+                font-size: 1.5em;
+            }
+        
+            .camera-grid {
+                /* La grille est déjà responsive grâce à auto-fit, pas besoin de la modifier ! */
+                gap: 15px; /* On peut juste réduire l'écart */
+            }
+        
+            #biometrics-monitor {
+                padding: 10px;
+            }
+        
+            .monitor-header {
+                flex-direction: column; /* Empile le titre et l'alerte sur mobile */
+                gap: 10px;
+                align-items: flex-start;
+            }
+        
+            .analysis-item span {
+                font-size: 1.1em; /* Réduit légèrement la taille des chiffres */
+            }
+        
+            .back-button {
+                width: 100%; /* Le bouton retour prend toute la largeur pour être facile à taper */
+                text-align: center;
+                box-sizing: border-box; /* S'assure que le padding ne casse pas la largeur */
+            }
+        }
     </style>
 </head>
 <body>
