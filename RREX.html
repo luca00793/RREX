@@ -556,9 +556,9 @@
                 });
 
                 const hoursScanned = SIMULATION_HOURS * progress;
-                const iah = hoursScanned > 0 ? eventsDetected / hoursScanned : 0;
+                const iah = hoursScanned > 0 ? eventsDetected * 100 / hoursScanned : 0;
                 
-                iahValueEl.textContent = iah.toFixed(100);
+                iahValueEl.textContent = iah.toFixed(1);
                 apneaCountEl.textContent = eventsDetected;
                 // Simuler durée en secondes (ex: 2 points = 1 seconde)
                 apneaDurationEl.textContent = `${Math.round(maxDuration/2)}s`;
