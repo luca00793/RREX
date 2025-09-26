@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[ACCÈS_SÉCURISÉ] // RAPPORT_SOS_OXYGENE</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+        :root {
+            
+            --background-dark: #010413; --primary-blue: #00ffff; --secondary-blue: #00aaff;
+            --glow-blue: rgba(0, 255, 255, 0.5); --text-light: #e0e0e0; --text-dark: #a0a0ff;
+            --alert-red: #ff005d; --glow-red: rgba(255, 0, 93, 0.7);
+            --graph-sleep: #00ffff; --graph-resp: #ffffff;
+        }
+        /* --- Effet de chargement initial --- */
+        #preloader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--background-dark); z-index: 1000; display: flex;
+            justify-content: center; align-items: center; color: var(--primary-blue);
+            font-size: 1.2em; flex-direction: column;
+        }
+        #preloader-text {
+            overflow: hidden; white-space: nowrap;
+            border-right: .15em solid var(--primary-blue);
+        }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes scanlines { 0% { background-position: 0 0; } 100% { background-position: 0 100%; } }
+        @keyframes flicker { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; } }
+        @keyframes background-pulse { 0% { background-color: var(--background-dark); } 50% { background-color: #020822; } 100% { background-color: var(--background-dark); } }
+        @keyframes blink-alert { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.7; transform: scale(1.05); } }
+        body { background-color: var(--background-dark); color: var(--text-light); font-family: 'Share Tech Mono', monospace; margin: 0; overflow-x: hidden; animation: background-pulse 15s infinite; }
+        body::after { content: ""; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: repeating-linear-gradient(0deg, rgba(0,0,0,0.1), rgba(0,0,0,0.1) 1px, transparent 1px, transparent 3px); animation: scanlines 0.5s linear infinite; pointer-events: none; z-index: 999; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; position: relative; z-index: 10; }
+        .interface-header, .interface-footer { position: fixed; left: 0; width: 100%; background: rgba(0, 10, 20, 0.8); backdrop-filter: blur(5px); border-bottom: 1px solid var(--secondary-blue); color: var(--secondary-blue); padding: 5px 20px; z-index: 100; }
+        .interface-header { top: 0; }
+        .interface-footer { bottom: 0; border-top: 1px solid var(--secondary-blue); border-bottom: 0; display: flex; justify-content: space-between;  }
+        .header-text, .footer-text { animation: flicker 3s infinite; }
+        .heartbeat { color: var(--primary-blue); margin-right: 10px; animation: flicker 1s infinite; }
+        #home-view { padding-top: 50px; padding-bottom: 50px; }
+        .main-title { text-align: center; margin-bottom: 20px; }
+        .main-title h1 { font-size: 2.5em; color: var(--primary-blue); text-shadow: 0 0 10px var(--glow-blue); margin: 0; }
+        .main-title p { color: var(--text-dark); letter-spacing: 2px; }
+        #biometrics-monitor { display: flex; gap: 20px; border: 1px solid var(--secondary-blue); background: linear-gradient(rgba(0,30,60,0.4), rgba(0,10,20,0.6)); padding: 15px; margin-bottom: 40px; box-shadow: 0 0 20px rgba(0,170,255,0.2) inset; }
+        .monitor-graphs { flex: 3; }
+        .monitor-analysis { flex: 1; border-left: 1px solid var(--secondary-blue); padding-left: 15px; }
+        .monitor-header { display: flex; justify-content: space-between; align-items: center; color: var(--primary-blue); border-bottom: 1px solid var(--secondary-blue); padding-bottom: 10px; margin-bottom: 10px; }
+        .monitor-header h2 { margin: 0; font-size: 1.2em; }
+        .status-alert { padding: 5px 10px; border: 1px solid; font-weight: bold; }
+        .status-alert.normal { color: var(--primary-blue); border-color: var(--primary-blue); }
+        .status-alert.critical { color: var(--alert-red); border-color: var(--alert-red); background-color: rgba(255,0,93,0.2); animation: blink-alert 1s infinite; display: none; }
+        .monitor-screen { position: relative; height: 150px; }
+        #sleep-graph { width: 100%; height: 100%; background: repeating-linear-gradient(var(--background-dark) 0, var(--background-dark) 1px, transparent 1px, transparent 20%), repeating-linear-gradient(90deg, #020822 0, #020822 1px, transparent 1px, transparent 20%); }
+        .graph-labels { position: absolute; top: 0; right: 10px; display: flex; flex-direction: column; align-items: flex-end; color: var(--text-dark); font-size: 0.8em; }
+        .graph-labels span { margin-bottom: 20px; } .graph-labels .label-sleep { color: var(--graph-sleep); } .graph-labels .label-resp { color: var(--graph-resp); }
+        .monitor-analysis h3 { color: var(--primary-blue); margin-top: 0; border-bottom: 1px solid var(--secondary-blue); padding-bottom: 5px; }
+        .analysis-item { margin-bottom: 10px; font-size: 0.9em; }
+        .analysis-item label { color: var(--text-dark); display: block; }
+        .analysis-item span { color: var(--text-light); font-size: 1.2em; font-weight: bold; }
+        .glowing-text-red { color: var(--alert-red); text-shadow: 0 0 8px var(--glow-red); }
+        #apnea-histogram-container { margin-top: 10px; }
+        #apnea-histogram-container h4 { margin: 0 0 5px 0; font-size: 0.8em; color: var(--text-dark); text-align: center; }
+        #apnea-histogram { width: 100%; height: 40px; }
+        .camera-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .camera-view { position: relative; border: 1px solid var(--secondary-blue); background-color: black; transition: transform 0.3s ease, box-shadow 0.3s ease; cursor: pointer; overflow: hidden; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 20px), calc(100% - 20px) 100%, 0 100%); }
+        .camera-view:hover { transform: translateY(-10px); box-shadow: 0 0 15px var(--glow-blue), 0 0 30px var(--glow-blue) inset; }
+        .camera-bg { position: absolute; top:0; left:0; width: 100%; height: 100%; background: linear-gradient(rgba(1,4,19,0.8), rgba(1,4,19,0.8)), url(https://images.unsplash.com/photo-1581094376363-95318b056588?q=80&w=800&auto=format&fit=crop); background-size: cover; filter: blur(3px) grayscale(50%); transform: scale(1.1); transition: filter 0.3s ease, transform 0.3s ease; }
+        .camera-view:hover .camera-bg { filter: blur(1px) grayscale(0%); transform: scale(1); }
+        .camera-data-overlay { position: absolute; top: 10px; left: 10px; right: 10px; bottom: 10px; color: var(--text-light); font-size: 0.7em; pointer-events: none; }
+        .camera-data-overlay .rec { color: var(--alert-red); animation: flicker 1.5s infinite; }
+        .camera-content { position: relative; z-index: 2; padding: 20px; background: linear-gradient(rgba(1,4,19,0.8), rgba(1,4,19,0.6)); height: 100%; box-sizing: border-box; }
+        .camera-content h2 { color: var(--primary-blue); margin-top: 20px; font-size: 1.2em; }
+        .camera-content p { color: var(--text-dark); font-size: 0.9em; }
+        .page-content { display: none; padding: 70px 40px; border: 1px solid var(--secondary-blue); background: rgba(0, 10, 20, 0.7); animation: fadeIn 1s; }
+        .page-content h1, .page-content h2 { color: var(--primary-blue); text-shadow: 0 0 5px var(--glow-blue); border-bottom: 1px solid var(--secondary-blue); padding-bottom: 10px; }
+        .page-content p, .page-content li { line-height: 1.8; color: var(--text-light); }
+        .interview { border-left: 3px solid var(--primary-blue); padding: 1px 20px; margin: 30px 0; background-color: rgba(0, 30, 60, 0.3); }
+        .interview q { display: block; font-style: italic; color: var(--text-dark); margin-bottom: 10px; }
+        .interview strong { color: var(--text-light); }
+        .back-button { display: inline-block; margin-bottom: 30px; padding: 10px 20px; background: transparent; border: 1px solid var(--primary-blue); color: var(--primary-blue); font-family: 'Share Tech Mono', monospace; cursor: pointer; transition: background-color 0.3s, color 0.3s; text-transform: uppercase; }
+        .back-button:hover { background-color: var(--primary-blue); color: var(--background-dark); box-shadow: 0 0 10px var(--glow-blue); }
+    </style>
+</head>
+<body>
+
+    <div id="preloader"><p id="preloader-text">> Connexion au réseau S.O.S Oxygène...</p></div>
+
+    <header class="interface-header"><span class="header-text">> ACCÈS_SYSTÈME: fuster_luca // NIVEAU_D'ACCÈS: ADMIN</span></header>
+
+    <div class="container">
+        <div id="home-view">
+            <div class="main-title">
+                <h1 data-scramble="true">Rapport de Stage</h1>
+                <p>> Analyse et Optimisation des Processus // Prestataire de Santé à Domicile</p>
+            </div>
+
+            <div id="biometrics-monitor">
+                <div class="monitor-graphs">
+                    <div class="monitor-header">
+                        <h2>SURVEILLANCE BIOMÉTRIQUE_PATIENT: #734</h2>
+                        <div>
+                            <span class="status-alert normal" id="status-normal">FLUX RESPIRATOIRE STABLE</span>
+                            <span class="status-alert critical" id="status-critical">APNÉE SÉVÈRE DÉTECTÉE</span>
+                        </div>
+                    </div>
+                    <div class="monitor-screen">
+                        <canvas id="sleep-graph"></canvas>
+                        <div class="graph-labels">
+                            <span class="label-sleep">STADE_SOMMEIL</span> <span class="label-resp">FLUX_RESPIRATOIRE</span>
+                            <span>PROFOND</span> <span>LÉGER</span> <span>PARADOXAL</span> <span>ÉVEIL</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="monitor-analysis">
+                    <h3>ANALYSE I.A.H.</h3>
+                    <div class="analysis-item">
+                        <label>IAH (Événements/heure)</label>
+                        <span id="iah-value">0.0</span>
+                    </div>
+                    <div class="analysis-item">
+                        <label>Événements Détectés</label>
+                        <span id="apnea-count">0</span>
+                    </div>
+                    <div class="analysis-item">
+                        <label>Apnée Max (secondes)</label>
+                        <span id="apnea-duration">0s</span>
+                    </div>
+                    <div id="apnea-histogram-container">
+                        <h4>Distribution des Événements</h4>
+                        <canvas id="apnea-histogram"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="camera-grid">
+                <div class="camera-view" data-target="introduction">
+                    <div class="camera-bg"></div><div class="camera-data-overlay"><span class="rec">● REC</span> <span>CAM_01</span></div>
+                    <div class="camera-content">
+                        <h2>// LOG_FILE: Introduction.dat</h2>
+                        <p>Accès au journal initial. Découverte d'un écosystème où l'humain et la data sont critiques.</p>
+                    </div>
+                </div>
+                 <div class="camera-view" data-target="organisation_humaine">
+                    <div class="camera-bg"></div><div class="camera-data-overlay"><span class="rec">● REC</span> <span>CAM_02</span></div>
+                    <div class="camera-content">
+                        <h2>I. LOG_FILE: Org_Humaine.log</h2>
+                        <p>Analyse des interactions humaines, maillon essentiel de la chaîne de réaction logistique.</p>
+                    </div>
+                </div>
+                <div class="camera-view" data-target="structure_organisationnelle">
+                    <div class="camera-bg"></div><div class="camera-data-overlay"><span class="rec">● REC</span> <span>CAM_03</span></div>
+                    <div class="camera-content">
+                        <h2>II. LOG_FILE: Structure_Org.log</h2>
+                        <p>Cartographie du réseau. Comprendre qui reçoit l'alerte et déclenche l'intervention.</p>
+                    </div>
+                </div>
+                <div class="camera-view" data-target="cycle_vie_machines">
+                    <div class="camera-bg"></div><div class="camera-data-overlay"><span class="rec">● REC</span> <span>CAM_04</span></div>
+                    <div class="camera-content">
+                        <h2>III. LOG_FILE: Cycle_Machines.db</h2>
+                        <p>Traçabilité et logistique. Comment l'IAH d'un patient déclenche le remplacement d'une machine.</p>
+                    </div>
+                </div>
+                <div class="camera-view" data-target="gouvernance_management">
+                    <div class="camera-bg"></div><div class="camera-data-overlay"><span class="rec">● REC</span> <span>CAM_05</span></div>
+                    <div class="camera-content">
+                        <h2>IV. LOG_FILE: Gouvernance.conf</h2>
+                        <p>Interception des protocoles de décision basés sur les alertes biométriques.</p>
+                    </div>
+                </div>
+                <div class="camera-view" data-target="innovation_technologique">
+                    <div class="camera-bg"></div><div class="camera-data-overlay"><span class="rec">● REC</span> <span>CAM_06</span></div>
+                    <div class="camera-content">
+                        <h2>V. LOG_FILE: Innovation.py</h2>
+                        <p>Injection de scripts d'analyse de données pour optimiser la réponse logistique.</p>
+                    </div>
+                </div>
+                <div class="camera-view" data-target="apprentissages_personnels">
+                    <div class="camera-bg"></div><div class="camera-data-overlay"><span class="rec">● REC</span> <span>CAM_07</span></div>
+                    <div class="camera-content">
+                        <h2>VI. LOG_FILE: Apprentissages.md</h2>
+                        <p>Extraction des compétences : de l'analyse de données brutes à la compréhension du besoin patient.</p>
+                    </div>
+                </div>
+                <div class="camera-view" data-target="conclusion">
+                    <div class="camera-bg"></div><div class="camera-data-overlay"><span class="rec">● REC</span> <span>CAM_08</span></div>
+                    <div class="camera-content">
+                        <h2>// LOG_FILE: Conclusion.dat</h2>
+                        <p>Fin de transmission. La technologie au service d'une logistique plus humaine et réactive.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- === SECTIONS DE CONTENU (TEXTE MIS À JOUR) === -->
+
+        <div id="cycle_vie_machines" class="page-content">
+            <button class="back-button">&lt; RETOUR_TERMINAL_PRINCIPAL</button>
+            <h1 data-scramble="true">III. Cycle de Vie des Machines - Analyse Détaillée des Processus</h1>
+            <p>Pour appréhender concrètement la complexité opérationnelle, je vais décrire le parcours de machines fictives, chacune racontant une facette du métier.</p>
+            <!-- ... (Sections 3.1 et 3.2 inchangées) ... -->
+            <h2>3.3 Machine C - La Complexité du Service Après-Vente et l'Impact des Données Patient</h2>
+            <p>La machine C est un cas d'école. Envoyée en réparation pour une panne mineure, elle est revenue du SAV externe avec un diagnostic alarmant révélant cinq autres problèmes. Le rapport du SAV est tombé comme un couperet. La première réaction a été la suspicion : incompétence du service technique ou tentative de gonfler la facture ? Après une enquête interne rigoureuse, il s'est avéré que les pannes étaient réelles, probablement dues à des conditions d'utilisation extrêmes chez le patient précédent.</p>
+            <p><strong>C'est ici que l'analyse des données biométriques, comme celles vues sur l'écran d'accueil, prend tout son sens.</strong> En croisant l'historique de la machine avec les données de sommeil du patient (télétransmises par la machine elle-même), nous aurions pu corréler les pannes à un IAH très élevé. Une telle analyse aurait immédiatement déclenché une alerte logistique, non pas pour une simple réparation, mais pour une investigation complète de l'appareil et une possible mise à niveau vers un modèle plus robuste pour ce type de pathologie. Cet incident a mis en lumière la nécessité d'une traçabilité absolue et a conduit à la mise en place d'un protocole renforcé : photos systématiques avant envoi, tests complets au retour, et documentation détaillée de l'historique de chaque appareil, enrichie des données patient critiques.</p>
+            <h2>3.4 Machine D - Remise en Circulation et Gestion de la Fin de Vie</h2>
+            <p>Après sa réparation complète, la machine C (devenue D) a subi un protocole de remise en service digne d'un bloc opératoire : nouveau cycle d'étiquetage, tests de performance poussés, désinfection selon les normes hospitalières et mise à jour de son "carnet de santé" numérique. Cette rigueur, qui peut sembler excessive, est la clé pour garantir la sécurité et la fiabilité. La gestion de la fin de vie est tout aussi structurée. L'entreprise a une approche RSE (Responsabilité Sociétale des Entreprises) très volontariste, avec des partenariats avec des filières spécialisées pour le recyclage des DEEE (Déchets d'Équipements Électriques et Électroniques), démontrant qu'une PME peut intégrer avec succès des préoccupations de développement durable.</p>
+        </div>
+        
+        <!-- ... (Toutes les autres pages de contenu restent identiques) ... -->
+        <div id="introduction" class="page-content">
+    <button class="back-button">&lt; RETOUR_TERMINAL_PRINCIPAL</button>
+    <h1 data-scramble="true">// Introduction</h1>
+    <p>Ce stage chez SOS Oxygène m'a été proposé via une connaissance de ma mère, et je n'en attendais pas grand-chose. Dans mon esprit, il s'agissait d'une entreprise de logistique médicale, un simple maillon dans la chaîne de soins. Je m'imaginais un entrepôt, des livraisons, des processus standardisés que je n’allais pas pouvoir optimiser. La réalité m'a frappé dès le premier jour. J'ai découvert non pas une simple entreprise recherchant le bénéfice, mais un écosystème complexe, un lieu où la dimension humaine prime sur tout le reste. Chaque décision, de la planification d’un envoi de matériel à la configuration d'une machine, est dictée par une finalité unique et non négociable : le bien-être du patient. Cette philosophie, je l'ai tout de suite trouvée admirable, mais ce qui a réellement captivé mon esprit d'ingénieur, que j’ai tout de suite voulu mettre à l'œuvre pour aider cette agence située en plein cœur de Paris.</p>
+    <p>Le secteur des prestations de santé à domicile est très dur. Il est si réglementé que la moindre approximation, la plus petite erreur, peut avoir des conséquences dramatiques sur la santé de quelqu’un. Cette responsabilité écrasante imprègne la culture de l'entreprise et se ressent dans chaque geste. Les machines à pression positive continue (PPC) pour l'apnée du sommeil que manipulent les équipes ne sont pas de simples objets techniques. Pour des centaines de patients souffrant d'insuffisance respiratoire, ce sont littéralement des poumons artificiels, garants de leur sommeil.</p>
+    <p>Dès mon arrivée, j'ai compris que l'organisation reposait sur une interdépendance totale. Le technicien sur le terrain est impuissant si la logistique ne lui prépare pas la bonne machine avec les bons consommables. La logistique, elle, navigue à l'aveugle sans les retours précis des techniciens pour anticiper les stocks ou les pannes. Cette symbiose forcée crée une atmosphère de coopération intense où la communication est reine. Une information mal transmise, un oubli dans la préparation d'un colis, et c'est l'effet domino assuré : un retard, un patient angoissé, un médecin partenaire mécontent, et dans le pire des scénarios, une rupture dans la chaîne de soins vitale.</p>
+    <p>Ce qui semblait être une mécanique bien huilée de l'extérieur s'est révélé être un équilibre précaire, maintenu à bout de bras par la compétence, l'attention et une solidarité sans faille. La complexité réside dans la gestion d'une multitude de variables imprévisibles : l'urgence médicale qui tombe à 2h du matin et que l’on doit gérer dès l’arrivée en agence, la panne technique sur un appareil critique, le problème de livraison dû à un accident, la difficulté relationnelle avec un patient en détresse, les méandres administratifs de la Sécurité Sociale et les réglementations sanitaires en perpétuelle évolution.</p>
+    <p>L'observation de ces dynamiques et mon supérieur, le responsable technique, m'ont orienté vers le rôle crucial, et parfois sous-estimé, des systèmes d'information. La traçabilité des équipements, la gestion des stocks, la planification, le suivi patient : tout repose sur des outils qui doivent être d'une fiabilité absolue. Pourtant, j'ai été surpris de constater que de nombreux processus restaient manuels, chronophages et sources d'erreurs potentielles. C'est dans cette brèche que j'ai trouvé ma place, voyant une opportunité d'appliquer mes compétences pour apporter une contribution concrète à la logistique de l’entreprise.</p>
+    <p>À travers ce rapport, j'aimerais que le lecteur saisisse trois dimensions qui forment l'ADN de SOS Oxygène : l’importance d'une logistique qui doit être à la fois répétitive et ultra-réactive ; la place centrale de la technique et de l'informatique comme piliers de la fiabilité ; et enfin, la richesse des relations humaines qui cimentent l'ensemble et permettent de surmonter les crises. Loin d'être un simple stage technique, cette immersion m'a confronté à des questions éthiques profondes sur la place de la technologie dans le soin et la responsabilité immense qui incombe à une entreprise privée au sein de notre système de santé public.</p>
+</div>
+<div id="organisation_humaine" class="page-content">
+    <button class="back-button">&lt; RETOUR_TERMINAL_PRINCIPAL</button>
+    <h1 data-scramble="true">I. Organisation Humaine</h1>
+    <h2>1.1 La Solidarité au Quotidien</h2>
+    <p>Chez SOS Oxygène, la solidarité n'est pas une ligne dans une charte de valeurs affichée dans l'entrée. C'est une réalité brute. Cette cohésion ne découle pas d'un management directif, mais d'une nécessité opérationnelle évidente. Chaque technicien est sur le terrain, mais il est totalement dépendant de sa base arrière, la logistique, pour recevoir les bon consommables, machines et informations dont le patient a besoin. En retour, la logistique a un besoin vital des "rapports de mission" des techniciens pour ajuster les stocks, anticiper les réparations et retenir les besoins concrets du patient. Cette dépendance mutuelle forge une culture d'entraide constante.</p>
+    <p>Une situation qui revenait souvent était la priorisation des patients et de l’envoi des consommables. Il y a eu durant tout mon stage une rupture de stock d’un masque très fragile; Nous passions donc toutes nos matinées à appeler des patients pour savoir quel autre masque leur donner en attendant. C’était énormément d’adaptation car chaque patient a des demandes différentes, prenant en compte son avis et l’avis de son médecin traitant.</p>
+    <h2>1.2 Les Moments de Convivialité</h2>
+    <p>Les pauses déjeuner sont bien plus qu'une simple coupure. Dans la salle de pause, autour d'une grande table, les frontières hiérarchiques s'estompent. Techniciens, logisticiens, administratifs et parfois même la direction partagent leur repas. On y débriefe les galères du matin, on cherche collectivement des solutions, mais on parle aussi de tout et de rien. Ces moments informels sont le cœur social de l'entreprise. J'étais personnellement au sous-sol, là ou se trouve la logistique, et on venait me chercher pour me sortir de mes tâches pour profiter avec le reste de l’équipe</p>
+    <p>J'ai été frappé de voir que les idées d'amélioration les plus pertinentes  naissaient souvent au cours de ces discussions informelles. Un technicien peut lancer : "Ce serait quand même plus simple si on avait un VPN pour quand on est en télétravail", malheureusement les services informatiques ne suivent pas dans le groupe.</p>
+    <p>Le métier peut être émotionnellement éprouvant. Le soutien psychologique que les collègues apportent mutuellement après une intervention difficile est une ressource inestimable pour prévenir de problèmes de santé mental dû surtout à la surcharge de travail. La direction l'a bien compris et encourage activement ces moments en fournissant un espace agréable et en organisant des événements d'équipe comme un petit jardin et une salle de pause.</p>
+    <h2>1.3 Gestion des Conflits et Résolution des Tensions</h2>
+    <p>Les conflits internes sont quasi inexistants, tant la dépendance mutuelle impose la coopération. Les tensions proviennent presque toujours de l'extérieur, notamment de la gestion de patients "non-observants" ou agressifs. Ces situations testent les limites du professionnalisme des équipes.</p>
+    <p>Un technicien m'a raconté le cas d'un patient souffrant d'apnée du sommeil qui disait avoir un problème avec toutes les machines qu’il utilisait. Effectivement, toutes ses machines revenait détruites. En observation à l'hôpital, ils se sont rendus compte qu’il faisait du somnambulisme et qu’il utilisait la PPC comme une faux pour “repousser les sarrasins” d'après ce qu’il disait dans son sommeil.</p>
+    <h2>1.4 Interview détaillée - Sophie, Technicienne</h2>
+    <div class="interview">
+        <p><strong>Q1 : Qu'est-ce qui te motive le plus dans ton boulot ?</strong></p>
+        <q>Franchement ? C'est le contact avec les gens. Sans hésiter. Tu sais que ce que tu fais, ça sert vraiment à quelque chose, que t'améliores leur confort, et parfois même que tu leur sauves la mise. Chaque machine que j'installe,... ça a un impact direct sur la vie de quelqu'un. J'ai des patients que je suis depuis des années... J'ai vu leur état s'améliorer grâce à nous, et j'ai aussi accompagné des familles dans des moments super durs. Ce côté humain, c'est... ouais, c'est irremplaçable.</q>
+        <p><strong>Q2 : C'est quoi les plus gros problèmes que tu rencontres ?</strong></p>
+        <q>Ah, les galères... (elle rit) C'est les imprévus, toujours. Et certains patients, faut le dire, qui ne sont pas faciles. Tiens, la semaine dernière par exemple, le truc de fou : trois urgences en même temps, dans des arrondissements différents. Un concentrateur qui lâche chez un patient BPCO, un masque de PPC qui irrite un autre, et une livraison en urgence pour une sortie d'hôpital. Là, t'as intérêt à ce que tout soit au top. Heureusement, les collègues ont assuré, ils ont pris des trucs de ma tournée pour que je puisse tout gérer.</q>
+        <p><strong>Q3 : Et l'ambiance dans l'agence, ça se passe comment ?</strong></p>
+        <q>L'ambiance ? C'est une vraie équipe. Les pauses, surtout le dej’, c'est sacré. C'est là qu'on débriefe et qu'on décompresse après une intervention tendue. On se marre bien aussi, heureusement ! Mais le plus important, c'est de savoir que tu peux compter sur les autres. Si j'ai une panne que j'arrive pas à régler, je passe un coup de fil et je sais que quelqu'un va me filer un coup de main. Cette confiance, ça change tout, et je pense que les patient le ressentent.</q>
+        <p><strong>Q4 : Tu as déjà eu un conflit vraiment marquant avec un  patient ou un collègue ?</strong></p>
+        <q>Avec un patient, ouais, ça arrive. Le pire, je crois que c'était un monsieur, la soixantaine, qui ne voulait absolument pas de sa PPC. Il est venu en agence pour se la faire poser et il s’est endormi devant moi en me parlant... Sa femme était désemparée, mais on a discuter pendant une heure ou plus avant que son mari se réveille. Au final, on a commencé par des petites séances, on a testé plusieurs masques... Ça a pris trois mois, trois longs mois, mais maintenant il l'utilise et il va beaucoup mieux.</q>
+        <p><strong>Q5 : Que penses-tu des outils informatiques ?</strong></p>
+        <q>Les outils informatiques ? Ah là là... Au début, honnêtement, on était plusieurs à faire la gueule. Surtout les anciens, habitués au bon vieux papier. On se disait 'encore un truc qui va nous compliquer la vie'. Et puis... ben on a vu le temps qu'on gagnait, et surtout le nombre d'erreurs qu'on évitait. L'appli sur le smartphone, c'est juste génial pour les rapports d'intervention. Et le scanner pour les codes-barres... une révolution ! Fini les prises de tête avec les numéros de série, plus de risque de se planter de machine.</q>
+    </div>
+</div>
+<div id="structure_organisationnelle" class="page-content">
+    <button class="back-button">&lt; RETOUR_TERMINAL_PRINCIPAL</button>
+    <h1 data-scramble="true">II. Structure Organisationnelle et Circulation de l'Information</h1>
+    <h2>2.1 Architecture Hiérarchique</h2>
+    <p>Le pouvoir décisionnel stratégique est centralisé au siège social à Nice, qui définit les grandes orientations du groupe. Cette centralisation assure une cohérence globale, mais est souvent au détriment de la réalité du terrain. La force de SOS Oxygène réside dans l'importante autonomie qu’ont les agences locales et leurs techniciens. Dans mon agence, la directrice, Mme Alice Mary, n'est pas une simple exécutante. Elle dispose d'une marge de manœuvre considérable pour adapter la stratégie aux réalités du terrain : spécificités géographiques, nature des partenariats avec les hôpitaux locaux, etc.</p>
+    <p>L'organigramme formel est pyramidal et clair : la directrice supervise quatre responsables de secteur (médical, technique, administratif, logistique). Cette structure a le mérite de bien délimiter les responsabilités. Cependant, la réalité du quotidien est bien plus fluide. Les interactions entre tous sont permanentes et constituent le véritable moteur de l'organisation.</p>
+    <h2>2.2 Réseaux Informels et Sociogramme</h2>
+    <p>Si l'on devait dessiner le sociogramme réel de l'agence, il serait bien plus complexe et réticulaire que l'organigramme officiel. Il est basé sur l'expérience et la compétence reconnue. Certains employés, sans position hiérarchique particulière, exercent une influence majeure. Michel, technicien avec quinze ans d'expérience, est la référence technique incontestée. Lorsqu'un problème complexe survient, c'est lui que tout le monde, y compris l'encadrement, consulte spontanément. Son avis fait autorité. De même, Sylvie, au service administratif, possède une connaissance encyclopédique des rouages de la Sécurité Sociale. Elle est la gardienne officieuse des procédures de remboursement et dépanne constamment ses collègues. Ces figures de "sachants" sont des pivots essentiels à la fluidité de l'organisation.</p>
+    <h2>2.3 Systèmes de Communication</h2>
+    <p>La communication au sein de l'agence est un modèle d'hybridation entre le numérique et l'humain.</p>
+    <ul>
+        <li><strong>OxyMobile, Oxyweb, Oxydrive :</strong> C'est le système nerveux central des opérations. Cette application mobile est l'outil de travail principal des techniciens, leur permettant de gérer les demandes téléphoniques des clients, de remonter des informations en temps réel et de documenter leurs interventions.</li>
+        <li><strong>Microsoft Outlook :</strong> Il reste l'outil privilégié pour les communications formelles, les échanges avec l'extérieur et la diffusion des notes de service.</li>
+        <li><strong>Vérifications Orales :</strong> Pour toute action critique, la confirmation orale (téléphone ou de vive voix) reste la règle. Cette redondance, qui pourrait sembler inefficace, est en réalité une sécurité indispensable pour prévenir des erreurs aux conséquences potentiellement graves.</li>
+        <li><strong>Réunions mensuelles :</strong> Courtes (une heure maximum) et denses, elles sont le lieu de la communication descendante et ascendante, permettant d'ajuster collectivement les processus en fonction des retours du terrain.</li>
+    </ul>
+    <h2>2.4 Circulation et Traitement de l'Information</h2>
+    <p>L'information circule majoritement de manière ascendante, du terrain vers la direction. Chaque rapport d'intervention saisi dans OxyMobile est une donnée précieuse qui est analysée pour détecter des tendances, anticiper des pannes récurrentes sur un modèle de machine ou identifier des besoins de formation. La traçabilité est une obsession, imposée par la réglementation mais intégrée dans la culture comme un outil d'amélioration continue. Chaque décision, chaque incident est documenté, non pas dans une logique de contrôle, mais dans une optique de partage de connaissances et de prévention.</p>
+</div>
+<div id="gouvernance_management" class="page-content">
+    <button class="back-button">&lt; RETOUR_TERMINAL_PRINCIPAL</button>
+    <h1 data-scramble="true">IV. Gouvernance et Management - Interview Approfondie</h1>
+    <h2>4.1 Vision Stratégique et Leadership : Entretien avec Mme Alice Mary</h2>
+    <p>Mon entretien avec Mme Alice Mary, la directrice de l'agence, a confirmé mes observations. Son management est un alliage rare d'exigence opérationnelle et d'humanisme sincère.</p>
+    <div class="interview">
+        <p><strong>Q1 : Quelle est votre priorité absolue dans la gestion de l'agence au quotidien ?</strong></p>
+        <q>Ma priorité absolue ? Le patient. C'est la seule chose qui compte vraiment, ce n'est même pas négociable. Chaque machine qu'on installe, chaque technicien qui part en intervention... on a la santé des gens entre nos mains. Notre logistique, c'est la colonne vertébrale de tout ça. Un grain de sable dans l'engrenage, et l'impact sur la qualité de vie, voire la survie d'un patient, peut être immédiat. Cette responsabilité, tout le monde la ressent ici, du technicien jusqu'à moi. C'est ce qui nous pousse à être exigeants, mais c'est aussi ce qui donne un sens incroyable à ce qu'on fait.</q>
+        <p><strong>Q2 : Concrètement, comment gérez-vous les situations d'urgence qui sont si fréquentes ?</strong></p>
+        <q>Les urgences... (elle souffle légèrement) C'est notre quotidien. On a beau avoir des protocoles pour tout, chaque urgence est un cas particulier qui demande de l'agilité. La clé, c'est la communication. Le flux d'information en temps réel entre le terrain et le bureau doit être parfait. Quand un patient vous appelle en pleine nuit, en panique parce que son concentrateur d'oxygène est en panne, la seule réponse acceptable est d'être chez lui dans l'heure. Ça demande une organisation militaire, des techniciens d'astreinte qui répondent présents, un stock dédié... et par-dessus tout, une équipe soudée. Dans ces moments-là, la confiance n'est pas une option, elle est vitale.</q>
+        <p><strong>Q3 : Quel rôle l'informatique joue-t-elle  dans votre stratégie ?</strong></p>
+        <q>L'informatique a été une véritable révolution pour nous, il faut être clair. L'application OxyMobile, les automatisations qu'on a mises en place... ça nous a permis de réduire drastiquement le risque d'erreur humaine, d'avoir une traçabilité impeccable et, surtout, de libérer du temps. Un temps précieux que nos techniciens peuvent maintenant consacrer à ce qui compte vraiment : parler avec les patients, les rassurer. Mais attention, je le dis toujours : la technologie doit rester un outil. Elle ne remplacera jamais l'empathie, l'écoute et le professionnalisme de mes équipes.</q>
+        <p><strong>Q4 : Comment encouragez-vous l'innovation au sein des équipes ?</strong></p>
+        <q>L'innovation ? Pour moi, elle vient du terrain. Les meilleures idées, ce sont mes équipes qui les ont, parce qu'elles sont confrontées aux problèmes tous les jours. On a une culture où on écoute tout le monde, peu importe la place dans l'organigramme. Prenez votre exemple : les automatisations que vous avez proposées étaient si pertinentes qu'on les a adoptées sur-le-champ. Ça a même changé la perception de certains qui étaient un peu... 'allergiques' au numérique. Ils ont vu que l'innovation, ça pouvait vraiment simplifier la vie.</q>
+        <p><strong>Q5 : Quelle est votre vision de la culture d'entreprise idéale ?</strong></p>
+        <q>Ce qui fait notre force, notre ADN, c'est l'humain. Bien sûr, il y a une hiérarchie, c'est nécessaire pour que ça tourne. Mais le moteur de cette agence, c'est la collaboration, l'entraide de tous les instants. Ma conviction profonde, c'est qu'on ne peut pas prétendre apporter un service humain de qualité à l'extérieur si on n'a pas cette même humanité en interne. Mes collaborateurs doivent se sentir écoutés, soutenus. C'est un cercle vertueux.</q>
+        <p><strong>Q6 : Quels sont les grands défis que vous anticipez pour le secteur ?</strong></p>
+        <q>Les défis à venir ? Ils sont nombreux. La concurrence devient plus rude, on voit arriver de gros acteurs, avec des approches très industrielles, peut-être moins personnalisées. Notre carte à jouer, c'est justement cette alliance entre l'excellence technique et la qualité de notre service humain. Pour ça, il n'y a pas de secret : il faut continuer à innover et à former nos équipes sans relâche. Et bien sûr, il faut rester agiles pour s'adapter à des réglementations qui changent tout le temps et à l'évolution des pathologies liées au vieillissement de la population.</q>
+    </div>
+</div>
+<div id="innovation_technologique" class="page-content">
+    <button class="back-button">&lt; RETOUR_TERMINAL_PRINCIPAL</button>
+    <h1 data-scramble="true">V. Innovation Technologique et Transformation Numérique</h1>
+    <h2>5.1 Mes Contributions aux Systèmes d'Information</h2>
+    <p>Mon rôle durant ce stage a été de me positionner comme un facilitateur technique. Mes contributions, bien que ciblées, ont eu un impact mesurable sur l'efficacité quotidienne.</p>
+    <ul>
+        <li><strong>Automatisation du Suivi des Machines :</strong> Le suivi des mouvements de matériel était une tâche manuelle, fastidieuse et source d'erreurs. J'ai développé un système automatisé basé sur la lecture de codes-barres. Concrètement, j'ai codé un script en Python utilisant la bibliothèque pandas pour traiter les exports et mettre à jour la base de données. Résultat : une réduction de 80% du temps alloué à cette tâche et une quasi-élimination des erreurs.</li>
+        <li><strong>Optimisation de la Gestion des Compteurs :</strong> Le relevé manuel des compteurs d'heures des appareils était une autre source de perte de temps. J'ai mis en place un processus de saisie et de traitement automatisé qui a transformé cette corvée en un processus fiable et rapide.</li>
+        <li><strong>Intégration d'un Système de Scanner :</strong> L'introduction de la lecture optique a été une petite révolution. J'ai non seulement développé l'interface, mais j'ai surtout accompagné le changement en organisant des mini-ateliers de 15 minutes avec chaque technicien pour les familiariser avec l'outil. L'adoption a été un succès immédiat.</li>
+    </ul>
+    <h2>5.2 Enjeux de Sécurité Informatique</h2>
+    <p>Mon audit informel a révélé des vulnérabilités typiques d'une PME en croissance : quelques postes fonctionnant encore sous des OS obsolètes, un réseau Wi-Fi avec des ports ouverts inutilement, et une sensibilisation insuffisante des utilisateurs aux risques de phishing. J'ai rédigé une note de synthèse avec des recommandations pragmatiques (plan de mise à jour, durcissement de la configuration réseau, mini-formation aux bonnes pratiques) qui a été prise très au sérieux par la direction, consciente des enjeux critiques liés à la protection des données de santé.</p>
+    <h2>5.3 Impact de la Transformation Numérique sur les Métiers</h2>
+    <p>L'introduction de ces outils a eu des effets profonds. Les techniciens ont gagné en autonomie et passent moins de temps sur des tâches administratives. Les logisticiens, libérés des saisies manuelles, peuvent se concentrer sur des missions à plus forte valeur ajoutée comme l'analyse prédictive des stocks. La relation client elle-même s'est améliorée, avec une traçabilité en temps réel qui permet une réactivité accrue.</p>
+</div>
+<div id="apprentissages_personnels" class="page-content">
+    <button class="back-button">&lt; RETOUR_TERMINAL_PRINCIPAL</button>
+    <h1 data-scramble="true">VI. Apprentissages Personnels et Développement Professionnel</h1>
+    <h2>6.1 Compétences Relationnelles et Management</h2>
+    <p>Ce stage a été une école de "soft skills". J'ai appris à adapter mon discours technique à des interlocuteurs non-initiés. J'ai développé des stratégies pour convaincre et accompagner le changement, en comprenant que la meilleure solution technique est inutile si elle n'est pas adoptée par les utilisateurs. Je suis arrivé en pensant que la logique et les faits suffisaient ; je repars en sachant que l'écoute, l'empathie et la pédagogie sont tout aussi importantes.</p>
+    <h2>6.2 Maîtrise Technique et Polyvalence Informatique</h2>
+    <p>J'ai pu appliquer concrètement un large éventail de compétences : Python pour l'automatisation, C++ pour des optimisations, PHP/HTML/JS pour des interfaces web, et SQL pour la manipulation des données. Mais l'apprentissage principal a été de développer des solutions non pas dans un cadre académique, mais dans un environnement de production avec ses contraintes de compatibilité, de robustesse et de facilité de maintenance.</p>
+    <h2>6.3 Compréhension de l'Entreprise et de ses Enjeux</h2>
+    <p>Je suis passé d'une vision en silo, centrée sur l'informatique, à une approche systémique de l'entreprise. J'ai compris les interactions complexes entre les différents services, les pressions externes (réglementaires, concurrentielles) et les enjeux internes (RH, stratégie). Travailler dans un domaine où l'erreur est proscrite m'a inculqué un sens des responsabilités et une rigueur qui me serviront toute ma vie.</p>
+</div>
+<div id="conclusion" class="page-content">
+    <button class="back-button">&lt; RETOUR_TERMINAL_PRINCIPAL</button>
+    <h1 data-scramble="true">// Conclusion</h1>
+    <p>Cette expérience chez SOS Oxygène a été bien plus qu'un simple stage de validation de cursus. Ce fut une véritable leçon de vie, professionnelle et humaine. La découverte la plus marquante reste la puissance d'une culture d'entreprise fondée sur le respect, la solidarité et le service d'une cause qui dépasse les individus. Voir des équipes s'investir avec une telle abnégation pour améliorer la qualité de vie de personnes qu'elles ne connaissent parfois que par leur pathologie est un modèle inspirant.</p>
+    <p>Cette dimension éthique du travail, souvent absente des discours purement techniques, s'est révélée être un formidable moteur de performance et de satisfaction. Elle a profondément influencé ma propre réflexion sur ma future carrière : comment puis-je mettre mes compétences techniques au service de projets porteurs de sens ?</p>
+    <p>Concrètement, j'ai appris à traduire des problèmes opérationnels complexes en solutions informatiques simples et efficaces. Cette confrontation au réel transforme radicalement la perception de l'ingénierie : elle n'est pas une discipline abstraite, mais un outil puissant pour améliorer le quotidien des gens et, dans ce cas précis, la qualité des soins.</p>
+    <p>L'impact de ce stage est durable. Les outils que j'ai développés  sont toujours en service, mais l'impact le plus significatif est peut-être d'avoir contribué, à mon échelle, à faire évoluer les mentalités sur le potentiel de l'innovation numérique. Cette expérience a forgé en moi une conviction : la réussite d'une transformation technologique repose moins sur la technologie elle-même que sur l'intelligence humaine et organisationnelle avec laquelle on l'intègre. C'est cette approche humaniste de l'innovation qui, j'en suis certain, guidera mon parcours professionnel futur.</p>
+</div>
+
+    </div>
+
+    <footer class="interface-footer">
+        <span class="footer-text">> STATUT_CONNEXION: SÉCURISÉE [256-bit AES]</span>
+        <span class="footer-text" id="footer-biometrie"><span class="heartbeat">-/\/\/\-</span> BIOMÉTRIE PATIENT: STABLE</span>
+    </footer>
+
+    <script>
+        class TextScramble { constructor(el) { this.el = el; this.chars = '!<>-_\\/[]{}—=+*^?#________'; this.update = this.update.bind(this); } setText(newText) { const oldText = this.el.innerText; const length = Math.max(oldText.length, newText.length); const promise = new Promise((resolve) => this.resolve = resolve); this.queue = []; for (let i = 0; i < length; i++) { const from = oldText[i] || ''; const to = newText[i] || ''; const start = Math.floor(Math.random() * 40); const end = start + Math.floor(Math.random() * 40); this.queue.push({ from, to, start, end }); } cancelAnimationFrame(this.frameRequest); this.frame = 0; this.update(); return promise; } update() { let output = ''; let complete = 0; for (let i = 0, n = this.queue.length; i < n; i++) { let { from, to, start, end, char } = this.queue[i]; if (this.frame >= end) { complete++; output += to; } else if (this.frame >= start) { if (!char || Math.random() < 0.28) { char = this.randomChar(); this.queue[i].char = char; } output += `<span class="scrambling">${char}</span>`; } else { output += from; } } this.el.innerHTML = output; if (complete === this.queue.length) { this.resolve(); } else { this.frameRequest = requestAnimationFrame(this.update); this.frame++; } } randomChar() { return this.chars[Math.floor(Math.random() * this.chars.length)]; } }
+    
+        document.addEventListener('DOMContentLoaded', () => {
+            // Effet typewriter JS pour le préloader
+            const preloaderText = document.getElementById('preloader-text');
+            const fullText = '> Connexion au réseau S.O.S OXYGENE...';
+            let i = 0;
+            function typeWriter() {
+                if (i < fullText.length) {
+                    preloaderText.textContent = fullText.slice(0, i + 1);
+                    i++;
+                    // Arrêter après le 3e point
+                    if (preloaderText.textContent.endsWith('...')) {
+                        preloaderText.textContent = fullText;
+                        preloaderText.style.borderRight = '.15em solid var(--primary-blue)';
+                        return;
+                    }
+                    setTimeout(typeWriter, 40);
+                }
+            }
+            typeWriter();
+            const preloader = document.getElementById('preloader');
+            const homeView = document.getElementById('home-view');
+            const pageContents = document.querySelectorAll('.page-content');
+            const backButtons = document.querySelectorAll('.back-button');
+            const cameraViews = document.querySelectorAll('.camera-view');
+            const scrambleElements = document.querySelectorAll('[data-scramble="true"]');
+            
+            const scrambleEffects = new Map();
+            scrambleElements.forEach(el => scrambleEffects.set(el, new TextScramble(el)));
+
+            setTimeout(() => { preloader.style.transition = 'opacity 0.5s ease-out'; preloader.style.opacity = '0'; setTimeout(() => preloader.style.display = 'none', 500); const mainTitleScramble = scrambleEffects.get(document.querySelector('#home-view h1')); mainTitleScramble.setText('Rapport de Stage'); }, 2000);
+
+            const showPage = (targetId) => { homeView.style.display = 'none'; pageContents.forEach(page => page.style.display = 'none'); const targetPage = document.getElementById(targetId); if (targetPage) { targetPage.style.display = 'block'; window.scrollTo(0, 0); const targetTitle = targetPage.querySelector('h1[data-scramble="true"]'); if (targetTitle) { scrambleEffects.get(targetTitle).setText(targetTitle.textContent); } } };
+            const showHome = () => { pageContents.forEach(page => page.style.display = 'none'); homeView.style.display = 'block'; window.scrollTo(0, 0); };
+            cameraViews.forEach(view => view.addEventListener('click', () => showPage(view.getAttribute('data-target'))));
+            backButtons.forEach(button => button.addEventListener('click', showHome));
+
+            // --- Logique du moniteur biométrique ---
+            const graphCanvas = document.getElementById('sleep-graph');
+            const graphCtx = graphCanvas.getContext('2d');
+            const histogramCanvas = document.getElementById('apnea-histogram');
+            const histogramCtx = histogramCanvas.getContext('2d');
+            const statusNormal = document.getElementById('status-normal');
+            const statusCritical = document.getElementById('status-critical');
+            const footerBiometrie = document.getElementById('footer-biometrie');
+            const iahValueEl = document.getElementById('iah-value');
+            const apneaCountEl = document.getElementById('apnea-count');
+            const apneaDurationEl = document.getElementById('apnea-duration');
+
+            let animationFrameId;
+
+            // Données de simulation
+            const TOTAL_POINTS = 200;
+            const SIMULATION_HOURS = 8;
+            const apneaEvents = [ { start: 50, duration: 15 }, { start: 120, duration: 10 } ];
+            const sleepData = Array.from({length: TOTAL_POINTS}, (_, i) => 0.5 + Math.sin(i / 15) * 0.3 + (Math.random() - 0.5) * 0.1);
+            let respData = Array.from({length: TOTAL_POINTS}, (_, i) => 0.5 + Math.sin(i/5) * 0.05 + (Math.random() - 0.5) * 0.02);
+            apneaEvents.forEach(event => { for(let i=0; i<event.duration; i++) { respData[event.start + i] = 0.5; } });
+
+            const setupCanvas = (canvas) => {
+                const dpr = window.devicePixelRatio || 1; const rect = canvas.getBoundingClientRect();
+                canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
+                canvas.getContext('2d').scale(dpr, dpr);
+            };
+
+            const drawHistogram = () => {
+                setupCanvas(histogramCanvas);
+                const w = histogramCanvas.clientWidth;
+                const h = histogramCanvas.clientHeight;
+                histogramCtx.clearRect(0,0,w,h);
+                histogramCtx.fillStyle = 'var(--alert-red)';
+                apneaEvents.forEach(event => {
+                    const x = (event.start / TOTAL_POINTS) * w;
+                    const barWidth = (event.duration / TOTAL_POINTS) * w;
+                    histogramCtx.fillRect(x, 0, barWidth, h);
+                });
+            };
+
+            const updateAnalytics = (progress) => {
+                const pointsScanned = Math.floor(TOTAL_POINTS * progress);
+                let eventsDetected = 0;
+                let maxDuration = 0;
+
+                apneaEvents.forEach(event => {
+                    if (event.start < pointsScanned) {
+                        eventsDetected++;
+                        if (event.duration > maxDuration) maxDuration = event.duration;
+                    }
+                });
+
+                const hoursScanned = SIMULATION_HOURS * progress;
+                const iah = hoursScanned > 0 ? eventsDetected / hoursScanned : 0;
+                
+                iahValueEl.textContent = iah.toFixed(1);
+                apneaCountEl.textContent = eventsDetected;
+                // Simuler durée en secondes (ex: 2 points = 1 seconde)
+                apneaDurationEl.textContent = `${Math.round(maxDuration/2)}s`;
+
+                if(iah > 30) { // Seuil pour apnée sévère
+                    iahValueEl.classList.add('glowing-text-red');
+                } else {
+                    iahValueEl.classList.remove('glowing-text-red');
+                }
+            };
+
+            const animateGraph = () => {
+                setupCanvas(graphCanvas);
+                const w = graphCanvas.clientWidth;
+                const h = graphCanvas.clientHeight;
+                let currentX = 0;
+                const animationSpeed = 0.5;
+
+                const draw = () => {
+                    graphCtx.clearRect(0, 0, w, h);
+                    const drawLine = (data, color, offsetY = 0, scaleY = 0.8, baseline = 0.1) => {
+                        graphCtx.beginPath();
+                        graphCtx.moveTo(0, h * (1 - data[0]) * scaleY + h * baseline + offsetY);
+                        graphCtx.strokeStyle = color; graphCtx.lineWidth = 2;
+                        for (let i = 1; i < data.length; i++) {
+                            const x = (i / (data.length - 1)) * w;
+                            if (x > currentX) break;
+                            const y = h * (1 - data[i]) * scaleY + h * baseline + offsetY;
+                            graphCtx.lineTo(x, y);
+                        }
+                        graphCtx.stroke();
+                    };
+
+                    drawLine(sleepData, 'var(--graph-sleep)');
+                    drawLine(respData, 'var(--graph-resp)', -h * 0.2, 0.4, 0.5);
+
+                    let inApnea = false;
+                    apneaEvents.forEach(event => {
+                        const apneaStartX = (event.start / TOTAL_POINTS) * w;
+                        const apneaEndX = ((event.start + event.duration) / TOTAL_POINTS) * w;
+                        if(currentX > apneaStartX && currentX < apneaEndX + 20) { inApnea = true; }
+                    });
+
+                    if (inApnea) {
+                        statusNormal.style.display = 'none'; statusCritical.style.display = 'inline-block';
+                        footerBiometrie.innerHTML = `<span class="heartbeat" style="color:var(--alert-red)">-/\_/-</span> BIOMÉTRIE PATIENT: CRITIQUE`;
+                    } else {
+                        statusNormal.style.display = 'inline-block'; statusCritical.style.display = 'none';
+                        footerBiometrie.innerHTML = `<span class="heartbeat">-/\/\/\-</span> BIOMÉTRIE PATIENT: STABLE`;
+                    }
+
+                    graphCtx.beginPath(); graphCtx.moveTo(currentX, 0); graphCtx.lineTo(currentX, h);
+                    graphCtx.strokeStyle = 'rgba(0, 255, 255, 0.5)'; graphCtx.lineWidth = 2; graphCtx.stroke();
+                    
+                    updateAnalytics(currentX / w);
+                    currentX += animationSpeed;
+                    if (currentX > w) { currentX = 0; }
+                    
+                    animationFrameId = requestAnimationFrame(draw);
+                };
+                cancelAnimationFrame(animationFrameId);
+                draw();
+            };
+            
+            drawHistogram();
+            animateGraph();
+            window.addEventListener('resize', () => {
+                animateGraph();
+                drawHistogram();
+            });
+        });
+    </script>
+</body>
+</html>
