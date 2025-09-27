@@ -6,14 +6,14 @@
     <title>[ACCÈS_SÉCURISÉ] // RAPPORT_SOS_OXYGENE</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+        
         :root {
-            
             --background-dark: #010413; --primary-blue: #00ffff; --secondary-blue: #00aaff;
             --glow-blue: rgba(0, 255, 255, 0.5); --text-light: #e0e0e0; --text-dark: #a0a0ff;
             --alert-red: #ff005d; --glow-red: rgba(255, 0, 93, 0.7);
             --graph-sleep: #00ffff; --graph-resp: #ffffff;
         }
-        /* --- Effet de chargement initial --- */
+
         #preloader {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: var(--background-dark); z-index: 1000; display: flex;
@@ -24,7 +24,7 @@
             overflow: hidden; white-space: nowrap;
             border-right: .15em solid var(--primary-blue);
         }
-        
+        /* Animation JS, plus besoin de typing/blink-caret */
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes scanlines { 0% { background-position: 0 0; } 100% { background-position: 0 100%; } }
         @keyframes flicker { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; } }
@@ -33,9 +33,9 @@
         body { background-color: var(--background-dark); color: var(--text-light); font-family: 'Share Tech Mono', monospace; margin: 0; overflow-x: hidden; animation: background-pulse 15s infinite; }
         body::after { content: ""; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: repeating-linear-gradient(0deg, rgba(0,0,0,0.1), rgba(0,0,0,0.1) 1px, transparent 1px, transparent 3px); animation: scanlines 0.5s linear infinite; pointer-events: none; z-index: 999; }
         .container { max-width: 1200px; margin: 0 auto; padding: 20px; position: relative; z-index: 10; }
-        .interface-header, .interface-footer { position: fixed; left: 0; width: 100%; background: rgba(0, 10, 20, 0.8); backdrop-filter: blur(5px); border-bottom: 1px solid var(--secondary-blue); color: var(--secondary-blue); padding: 5px 20px; z-index: 100; }
+        .interface-header, .interface-footer { position: fixed; left: 0; width: 100%; background: rgba(0, 10, 20, 0.8); backdrop-filter: blur(5px); border-bottom: 1px solid var(--secondary-blue); color: var(--secondary-blue); padding: 5px 20px; z-index: 100; box-sizing: border-box; }
         .interface-header { top: 0; }
-        .interface-footer { bottom: 0; border-top: 1px solid var(--secondary-blue); border-bottom: 0; display: flex; justify-content: space-between;  }
+        .interface-footer { bottom: 0; border-top: 1px solid var(--secondary-blue); border-bottom: 0; display: flex; justify-content: space-between; }
         .header-text, .footer-text { animation: flicker 3s infinite; }
         .heartbeat { color: var(--primary-blue); margin-right: 10px; animation: flicker 1s infinite; }
         #home-view { padding-top: 50px; padding-bottom: 50px; }
@@ -53,7 +53,7 @@
         .monitor-screen { position: relative; height: 150px; }
         #sleep-graph { width: 100%; height: 100%; background: repeating-linear-gradient(var(--background-dark) 0, var(--background-dark) 1px, transparent 1px, transparent 20%), repeating-linear-gradient(90deg, #020822 0, #020822 1px, transparent 1px, transparent 20%); }
         .graph-labels { position: absolute; top: 0; right: 10px; display: flex; flex-direction: column; align-items: flex-end; color: var(--text-dark); font-size: 0.8em; }
-        .graph-labels span { margin-bottom: 20px; } .graph-labels .label-sleep { color: var(--graph-sleep); } .graph-labels .label-resp { color: var(--graph-resp); }
+        .graph-labels span { margin-bottom: 5px; } .graph-labels .label-sleep { color: var(--graph-sleep); } .graph-labels .label-resp { color: var(--graph-resp); }
         .monitor-analysis h3 { color: var(--primary-blue); margin-top: 0; border-bottom: 1px solid var(--secondary-blue); padding-bottom: 5px; }
         .analysis-item { margin-bottom: 10px; font-size: 0.9em; }
         .analysis-item label { color: var(--text-dark); display: block; }
@@ -73,156 +73,39 @@
         .camera-content h2 { color: var(--primary-blue); margin-top: 20px; font-size: 1.2em; }
         .camera-content p { color: var(--text-dark); font-size: 0.9em; }
         .page-content { display: none; padding: 70px 40px; border: 1px solid var(--secondary-blue); background: rgba(0, 10, 20, 0.7); animation: fadeIn 1s; }
-        .page-content h1, .page-content h2 { color: var(--primary-blue); text-shadow: 0 0 5px var(--glow-blue); border-bottom: 1px solid var(--secondary-blue); padding-bottom: 10px; }
+        .page-content h1, .page-content h2, .page-content h3 { color: var(--primary-blue); text-shadow: 0 0 5px var(--glow-blue); border-bottom: 1px solid var(--secondary-blue); padding-bottom: 10px; }
         .page-content p, .page-content li { line-height: 1.8; color: var(--text-light); }
         .interview { border-left: 3px solid var(--primary-blue); padding: 1px 20px; margin: 30px 0; background-color: rgba(0, 30, 60, 0.3); }
         .interview q { display: block; font-style: italic; color: var(--text-dark); margin-bottom: 10px; }
         .interview strong { color: var(--text-light); }
         .back-button { display: inline-block; margin-bottom: 30px; padding: 10px 20px; background: transparent; border: 1px solid var(--primary-blue); color: var(--primary-blue); font-family: 'Share Tech Mono', monospace; cursor: pointer; transition: background-color 0.3s, color 0.3s; text-transform: uppercase; }
         .back-button:hover { background-color: var(--primary-blue); color: var(--background-dark); box-shadow: 0 0 10px var(--glow-blue); }
-        /* --- BLOC DE CODE POUR L'ADAPTABILITÉ (RESPONSIVE DESIGN) --- */
-
-        /* Pour les tablettes et écrans de taille moyenne (en dessous de 1024px) */
+        #preloader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--background-dark); z-index: 1000; display: flex; justify-content: center; align-items: center; color: var(--primary-blue); font-size: 1.2em; flex-direction: column; }
+        #preloader-text { overflow: hidden; white-space: nowrap; border-right: .15em solid var(--primary-blue); animation: typing 3.5s steps(40, end), blink-caret .75s step-end infinite; }
+        
+        /* --- BLOC RESPONSIVE DESIGN --- */
         @media (max-width: 1024px) {
-            #biometrics-monitor {
-                flex-direction: column; /* Empile le graphe et l'analyse verticalement */
-                gap: 15px;
-            }
-        
-            .monitor-analysis {
-                border-left: none; /* Supprime la bordure latérale */
-                padding-left: 0;
-                border-top: 1px solid var(--secondary-blue); /* Ajoute une bordure supérieure */
-                padding-top: 15px;
-                margin-top: 15px; /* Ajoute un peu d'espace */
-            }
+            #biometrics-monitor { flex-direction: column; gap: 15px; }
+            .monitor-analysis { border-left: none; padding-left: 0; border-top: 1px solid var(--secondary-blue); padding-top: 15px; margin-top: 15px; }
         }
-        
-        /* Pour les téléphones mobiles (en dessous de 768px) */
         @media (max-width: 768px) {
-            .container {
-                padding: 10px; /* Réduit les marges globales */
-            }
-        
-            .main-title h1 {
-                font-size: 1.8em; /* Réduit la taille du titre principal */
-            }
-        
-            .main-title p {
-                font-size: 0.9em;
-                letter-spacing: 1px;
-            }
-            
-            .interface-header, .interface-footer {
-                padding: 5px 10px;
-                font-size: 0.7em; /* Réduit la taille du texte dans le header/footer */
-            }
-        
-            .page-content {
-                padding: 60px 15px; /* Ajuste le padding des pages de contenu */
-            }
-            
-            .page-content h1 {
-                font-size: 1.5em;
-            }
-        
-            .camera-grid {
-                /* La grille est déjà responsive grâce à auto-fit, pas besoin de la modifier ! */
-                gap: 15px; /* On peut juste réduire l'écart */
-            }
-        
-            #biometrics-monitor {
-                padding: 10px;
-            }
-        
-            .monitor-header {
-                flex-direction: column; /* Empile le titre et l'alerte sur mobile */
-                gap: 10px;
-                align-items: flex-start;
-            }
-        
-            .analysis-item span {
-                font-size: 1.1em; /* Réduit légèrement la taille des chiffres */
-            }
-        
-            .back-button {
-                width: 100%; /* Le bouton retour prend toute la largeur pour être facile à taper */
-                text-align: center;
-                box-sizing: border-box; /* S'assure que le padding ne casse pas la largeur */
-            }
-            /* --- BLOC DE CODE POUR L'ADAPTABILITÉ MOBILE --- */
-
-            /* Applique ces styles uniquement si la largeur de l'écran est de 768px ou moins */
-            @media (max-width: 768px) {
-                .container {
-                    padding: 10px; /* Réduit les marges globales pour maximiser l'espace */
-                }
-            
-                .main-title h1 {
-                    font-size: 1.8em; /* Réduit la taille du titre principal */
-                }
-            
-                .main-title p {
-                    font-size: 0.9em;
-                    letter-spacing: 1px;
-                }
-                
-                .interface-header, .interface-footer {
-                    padding: 5px 10px;
-                    font-size: 0.7em; /* Réduit la taille du texte dans le header/footer */
-                }
-                
-                /* Empile le moniteur biométrique verticalement */
-                #biometrics-monitor {
-                    flex-direction: column; 
-                    gap: 15px;
-                    padding: 10px;
-                }
-            
-                .monitor-analysis {
-                    border-left: none; /* Supprime la bordure latérale */
-                    padding-left: 0;
-                    border-top: 1px solid var(--secondary-blue); /* Ajoute une bordure de séparation en haut */
-                    padding-top: 15px;
-                    margin-top: 15px;
-                }
-            
-                .monitor-header {
-                    flex-direction: column; /* Empile le titre et l'alerte du moniteur */
-                    gap: 10px;
-                    align-items: flex-start;
-                }
-            
-                .analysis-item span {
-                    font-size: 1.1em; /* Réduit légèrement la taille des chiffres de l'analyse */
-                }
-            
-                .camera-grid {
-                    gap: 15px; /* Réduit l'écart entre les "caméras" */
-                }
-                
-                /* Ajuste le contenu des pages pour les petits écrans */
-                .page-content {
-                    padding: 60px 15px; 
-                }
-                
-                .page-content h1 {
-                    font-size: 1.5em;
-                }
-            
-                /* Le bouton retour prend toute la largeur pour être facile à taper */
-                .back-button {
-                    width: 100%; 
-                    text-align: center;
-                    box-sizing: border-box; 
-                }
-            }
+            .container { padding: 10px; }
+            .main-title h1 { font-size: 1.8em; }
+            .main-title p { font-size: 0.9em; letter-spacing: 1px; }
+            .interface-header, .interface-footer { padding: 5px 10px; font-size: 0.7em; }
+            .page-content { padding: 60px 15px; }
+            .page-content h1 { font-size: 1.5em; }
+            .camera-grid { gap: 15px; }
+            #biometrics-monitor { padding: 10px; }
+            .monitor-header { flex-direction: column; gap: 10px; align-items: flex-start; }
+            .analysis-item span { font-size: 1.1em; }
+            .back-button { width: 100%; text-align: center; box-sizing: border-box; }
         }
     </style>
 </head>
 <body>
 
-    <div id="preloader"><p id="preloader-text">> Connexion au réseau S.O.S Oxygène...</p></div>
+    <div id="preloader"><p id="preloader-text">> Connexion au réseau S.O.S OXYGENE...</p></div>
 
     <header class="interface-header"><span class="header-text">> ACCÈS_SYSTÈME: fuster_luca // NIVEAU_D'ACCÈS: ADMIN</span></header>
 
@@ -275,191 +158,204 @@
                 <div class="camera-view" data-target="introduction">
                     <div class="camera-bg"></div><div class="camera-data-overlay"><span class="rec">● REC</span> <span>CAM_01</span></div>
                     <div class="camera-content">
-                        <h2>// LOG_FILE: Introduction.dat</h2>
-                        <p>Accès au journal initial. Découverte d'un écosystème où l'humain et la data sont critiques.</p>
+                        <h2>// LOG_FILE: Introduction</h2>
+                        <p>Avant-propos, remerciements et introduction au cœur du système.</p>
                     </div>
                 </div>
                  <div class="camera-view" data-target="organisation_humaine">
                     <div class="camera-bg"></div><div class="camera-data-overlay"><span class="rec">● REC</span> <span>CAM_02</span></div>
                     <div class="camera-content">
-                        <h2>I. LOG_FILE: Org_Humaine.log</h2>
+                        <h2>I. LOG_FILE: Organisation Humaine</h2>
                         <p>Analyse des interactions humaines, maillon essentiel de la chaîne de réaction logistique.</p>
                     </div>
                 </div>
-                <div class="camera-view" data-target="structure_organisationnelle">
+                <div class="camera-view" data-target="structures_relationnelles">
                     <div class="camera-bg"></div><div class="camera-data-overlay"><span class="rec">● REC</span> <span>CAM_03</span></div>
                     <div class="camera-content">
-                        <h2>II. LOG_FILE: Structure_Org.log</h2>
+                        <h2>II. LOG_FILE: Structures relationnelles</h2>
                         <p>Cartographie du réseau. Comprendre qui reçoit l'alerte et déclenche l'intervention.</p>
                     </div>
                 </div>
                 <div class="camera-view" data-target="cycle_vie_machines">
                     <div class="camera-bg"></div><div class="camera-data-overlay"><span class="rec">● REC</span> <span>CAM_04</span></div>
                     <div class="camera-content">
-                        <h2>III. LOG_FILE: Cycle_Machines.db</h2>
+                        <h2>III. LOG_FILE: Cycle_Machines</h2>
                         <p>Traçabilité et logistique. Comment l'IAH d'un patient déclenche le remplacement d'une machine.</p>
                     </div>
                 </div>
-                <div class="camera-view" data-target="gouvernance_management">
+                <div class="camera-view" data-target="innovation_numerique">
                     <div class="camera-bg"></div><div class="camera-data-overlay"><span class="rec">● REC</span> <span>CAM_05</span></div>
                     <div class="camera-content">
-                        <h2>IV. LOG_FILE: Gouvernance.conf</h2>
-                        <p>Interception des protocoles de décision basés sur les alertes biométriques.</p>
+                        <h2>V. LOG_FILE: Innovation</h2>
+                        <p>Injection de scripts d'analyse pour optimiser la réponse logistique.</p>
                     </div>
                 </div>
-                <div class="camera-view" data-target="innovation_technologique">
+                <div class="camera-view" data-target="personnel_professionnel">
                     <div class="camera-bg"></div><div class="camera-data-overlay"><span class="rec">● REC</span> <span>CAM_06</span></div>
                     <div class="camera-content">
-                        <h2>V. LOG_FILE: Innovation.py</h2>
-                        <p>Injection de scripts d'analyse de données pour optimiser la réponse logistique.</p>
-                    </div>
-                </div>
-                <div class="camera-view" data-target="apprentissages_personnels">
-                    <div class="camera-bg"></div><div class="camera-data-overlay"><span class="rec">● REC</span> <span>CAM_07</span></div>
-                    <div class="camera-content">
-                        <h2>VI. LOG_FILE: Apprentissages.md</h2>
+                        <h2>VI. LOG_FILE: Apprentissages</h2>
                         <p>Extraction des compétences : de l'analyse de données brutes à la compréhension du besoin patient.</p>
                     </div>
                 </div>
                 <div class="camera-view" data-target="conclusion">
+                    <div class="camera-bg"></div><div class="camera-data-overlay"><span class="rec">● REC</span> <span>CAM_07</span></div>
+                    <div class="camera-content">
+                        <h2>// LOG_FILE: Conclusion</h2>
+                        <p>Fin de transmission. La technologie au service d'une logistique plus humaine et réactive.</p>
+                    </div>
+                </div>
+                <div class="camera-view" data-target="annexes">
                     <div class="camera-bg"></div><div class="camera-data-overlay"><span class="rec">● REC</span> <span>CAM_08</span></div>
                     <div class="camera-content">
-                        <h2>// LOG_FILE: Conclusion.dat</h2>
-                        <p>Fin de transmission. La technologie au service d'une logistique plus humaine et réactive.</p>
+                        <h2>// LOG_FILE: Annexes</h2>
+                        <p>Accès aux fichiers joints : interviews et captures du logiciel.</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- === SECTIONS DE CONTENU (TEXTE MIS À JOUR) === -->
+        <!-- === SECTIONS DE CONTENU === -->
 
-        <div id="cycle_vie_machines" class="page-content">
+        <div id="introduction" class="page-content">
             <button class="back-button">&lt; RETOUR_TERMINAL_PRINCIPAL</button>
-            <h1 data-scramble="true">III. Cycle de Vie des Machines - Analyse Détaillée des Processus</h1>
-            <p>Pour appréhender concrètement la complexité opérationnelle, je vais décrire le parcours de machines fictives, chacune racontant une facette du métier.</p>
-            <!-- ... (Sections 3.1 et 3.2 inchangées) ... -->
-            <h2>3.3 Machine C - La Complexité du Service Après-Vente et l'Impact des Données Patient</h2>
-            <p>La machine C est un cas d'école. Envoyée en réparation pour une panne mineure, elle est revenue du SAV externe avec un diagnostic alarmant révélant cinq autres problèmes. Le rapport du SAV est tombé comme un couperet. La première réaction a été la suspicion : incompétence du service technique ou tentative de gonfler la facture ? Après une enquête interne rigoureuse, il s'est avéré que les pannes étaient réelles, probablement dues à des conditions d'utilisation extrêmes chez le patient précédent.</p>
-            <p><strong>C'est ici que l'analyse des données biométriques, comme celles vues sur l'écran d'accueil, prend tout son sens.</strong> En croisant l'historique de la machine avec les données de sommeil du patient (télétransmises par la machine elle-même), nous aurions pu corréler les pannes à un IAH très élevé. Une telle analyse aurait immédiatement déclenché une alerte logistique, non pas pour une simple réparation, mais pour une investigation complète de l'appareil et une possible mise à niveau vers un modèle plus robuste pour ce type de pathologie. Cet incident a mis en lumière la nécessité d'une traçabilité absolue et a conduit à la mise en place d'un protocole renforcé : photos systématiques avant envoi, tests complets au retour, et documentation détaillée de l'historique de chaque appareil, enrichie des données patient critiques.</p>
-            <h2>3.4 Machine D - Remise en Circulation et Gestion de la Fin de Vie</h2>
-            <p>Après sa réparation complète, la machine C (devenue D) a subi un protocole de remise en service digne d'un bloc opératoire : nouveau cycle d'étiquetage, tests de performance poussés, désinfection selon les normes hospitalières et mise à jour de son "carnet de santé" numérique. Cette rigueur, qui peut sembler excessive, est la clé pour garantir la sécurité et la fiabilité. La gestion de la fin de vie est tout aussi structurée. L'entreprise a une approche RSE (Responsabilité Sociétale des Entreprises) très volontariste, avec des partenariats avec des filières spécialisées pour le recyclage des DEEE (Déchets d'Équipements Électriques et Électroniques), démontrant qu'une PME peut intégrer avec succès des préoccupations de développement durable.</p>
+            <h1 data-scramble="true">// Avant-propos & Introduction</h1>
+            <p>Ce RREX retrace mon expérience au sein de l’entreprise SOS Oxygène. Vous pourrez retrouver à l’adresse suivante : <a href="https://luca00793.github.io/RREX/RREX" target="_blank" style="color: var(--primary-blue);">https://luca00793.github.io/RREX/RREX</a> le site web qui résume, de par sa forme et son contenu, l’expérience que j’ai pu vivre lors de mon stage et aider à améliorer leurs outils informatiques.</p>
+            <p>Ce stage chez SOS Oxygène m'a été proposé via une connaissance de ma mère, et je n'en attendais pas grand-chose. Dans mon esprit, il s'agissait d'une entreprise de logistique médicale, un simple maillon dans la chaîne de soins. Je m'imaginais un entrepôt, des livraisons, des processus standardisés que je n’allais pas pouvoir optimiser. La réalité m'a frappé dès le premier jour. J'ai découvert non pas une simple entreprise recherchant le bénéfice, mais un écosystème complexe, un lieu où la dimension humaine prime sur tout le reste. Chaque décision, de la planification d’un envoi de matériel à la configuration d'une machine, est dictée par une finalité unique et non négociable : le bien-être du patient. Cette philosophie, je l'ai tout de suite trouvée admirable, mais ce qui a réellement captivé mon esprit d'ingénieur, que j’ai tout de suite voulu mettre à l'œuvre pour aider cette agence située en plein cœur de Paris.</p>
+            <h3>Remerciements</h3>
+            <p>Tout d’abord je souhaite remercier M. Champy, mon tuteur de stage. c’est lui qui m’a intégré au sein de l’agence et m’a suivi durant les cinq semaines qui ont composé cette expérience. Je me dois aussi de remercier Durcile, le responsable logistique avec qui j’ai travaillé main dans la main pour faire tourner la logistique de SOS Oxygène Morphée. Il y a aussi Mme Mary sans qui ce stage n’aurait jamais eu lieu. Merci de plus à toutes les personnes de l’agence qui m’ont rencontré, fait confiance et m’ont montré un monde du travail bien différent de celui dans lequel je pensais rentrer.</p>
+            <h2 data-scramble="true">Introduction</h2>
+            <p>Le secteur des prestations de santé à domicile est très dur. Il est si réglementé que la moindre approximation, la plus petite erreur, peut avoir des conséquences dramatiques sur la santé de quelqu’un. Cette responsabilité écrasante imprègne la culture de l'entreprise et se ressent dans chaque geste. Les machines à pression positive continue (PPC) pour l'apnée du sommeil que manipulent les équipes ne sont pas de simples objets techniques. Pour des centaines de patients souffrant d'insuffisance respiratoire, ce sont littéralement des poumons artificiels, garants de leur sommeil.</p>
+            <p>Dès mon arrivée, j'ai compris que l'organisation reposait sur une interdépendance totale. Le technicien sur le terrain est impuissant si la logistique ne lui prépare pas la bonne machine avec les bons consommables. La logistique, elle, navigue à l'aveugle sans les retours précis des techniciens pour anticiper les stocks ou les pannes. Cette symbiose forcée crée une atmosphère de coopération intense où la communication est reine. Une information mal transmise, un oubli dans la préparation d'un colis, et c'est l'effet domino assuré : un retard, un patient angoissé, un médecin partenaire mécontent, et dans le pire des scénarios, une rupture dans la chaîne de soins vitale.</p>
+            <p>Ce qui semblait être une mécanique bien huilée de l'extérieur s'est révélé être un équilibre précaire, maintenu à bout de bras par la compétence, l'attention et une solidarité sans faille. La complexité réside dans la gestion d'une multitude de variables imprévisibles : l'urgence médicale qui tombe à 2h du matin et que l’on doit gérer dès l’arrivée en agence, la panne technique sur un appareil critique, le problème de livraison dû à un accident, la difficulté relationnelle avec un patient en détresse, les méandres administratifs de la Sécurité Sociale et les réglementations sanitaires en perpétuelle évolution.</p>
+            <p>L'observation de ces dynamiques et mon supérieur, le responsable technique, m'ont orienté vers le rôle crucial, et parfois sous-estimé, des systèmes d'information. La traçabilité des équipements, la gestion des stocks, la planification, le suivi patient : tout repose sur des outils qui doivent être d'une fiabilité absolue. Pourtant, j'ai été surpris de constater que de nombreux processus restaient manuels, chronophages et sources d'erreurs potentielles. C'est dans cette brèche que j'ai trouvé ma place, voyant une opportunité d'appliquer mes compétences pour apporter une contribution concrète à la logistique de l’entreprise.</p>
+            <p>À travers ce rapport, j'aimerais que le lecteur saisisse trois dimensions qui forment l'ADN de SOS Oxygène : l’importance d'une logistique qui doit être à la fois répétitive et ultra-réactive ; la place centrale de la technique et de l'informatique comme piliers de la fiabilité ; et enfin, la richesse des relations humaines qui cimentent l'ensemble et permettent de surmonter les crises. Loin d'être un simple stage technique, cette immersion m'a confronté à des questions éthiques profondes sur la place de la technologie dans le soin et la responsabilité immense qui incombe à une entreprise privée au sein de notre système de santé public.</p>
+        </div>
+
+        <div id="organisation_humaine" class="page-content">
+            <button class="back-button">&lt; RETOUR_TERMINAL_PRINCIPAL</button>
+            <h1 data-scramble="true">I. Organisation Humaine</h1>
+            <h2>1.1 - La solidarité au quotidien</h2>
+            <p>Chez SOS Oxygène, la solidarité n'est pas une ligne dans une charte de valeurs affichée dans l'entrée. C'est une réalité brute. Cette cohésion ne découle pas d'un management directif, mais d'une nécessité opérationnelle évidente. Chaque technicien est sur le terrain, mais il est totalement dépendant de sa base arrière, la logistique, pour recevoir les bon consommables, machines et informations dont le patient a besoin. En retour, la logistique a un besoin vital des "rapports de mission" des techniciens pour ajuster les stocks, anticiper les réparations et retenir les besoins concrets du patient. Cette dépendance mutuelle forge une culture d'entraide constante.</p>
+            <p>Cette solidarité se manifeste également de manière très concrète entre les techniciens eux-mêmes, formant une véritable fraternité de terrain. Il n'est pas rare qu'un collègue, confronté à une panne de véhicule en rase campagne ou à une difficulté technique imprévue chez un patient, lance un appel à l'aide sur le groupe de discussion interne. En quelques minutes, sans même attendre une instruction de la hiérarchie, celui qui se trouve le plus proche se déroute pour prêter main-forte, partager une pièce de rechange ou simplement apporter son expertise sur une machine récalcitrante. Cette réactivité horizontale, non-officielle mais profondément ancrée dans les mœurs, est le filet de sécurité qui garantit la continuité du service face aux aléas. Elle témoigne d'une conscience collective aiguë où l'échec individuel n'existe pas ; seul compte le succès de la mission, c'est-à-dire le bien-être du patient. Cette culture de l'entraide spontanée est sans doute l'actif le plus précieux et le moins quantifiable de l'entreprise.</p>
+            <p>Une situation qui revenait souvent était la priorisation des patients et de l’envoi des consommables. Il y a eu durant tout mon stage une rupture de stock d’un masque très fragile; Nous passions donc toutes nos matinées à appeler des patients pour savoir quel autre masque leur donner en attendant. C’était énormément d’adaptation car chaque patient a des demandes différentes, prenant en compte son avis et l’avis de son médecin traitant.</p>
+            <h2>1.2 - Les moments de convivialité</h2>
+            <p>Les pauses déjeuner sont bien plus qu'une simple coupure. Dans la salle de pause, autour d'une grande table, les frontières hiérarchiques s'estompent. Techniciens, logisticiens, administratifs et parfois même la direction partagent leur repas. On y débriefe les galères du matin, on cherche collectivement des solutions, mais on parle aussi de tout et de rien. Ces moments informels sont le cœur social de l'entreprise. J'étais personnellement au sous-sol, là ou se trouve la logistique, et on venait me chercher pour me sortir de mes tâches pour profiter avec le reste de l’équipe</p>
+            <p>J'ai été frappé de voir que les idées d'amélioration les plus pertinentes naissaient souvent au cours de ces discussions informelles. Un technicien peut lancer : "Ce serait quand même plus simple si on avait un VPN pour quand on est en télétravail", malheureusement les services informatiques ne suivent pas dans le groupe.</p>
+            <p>Le métier peut être émotionnellement éprouvant. Le soutien psychologique que les collègues apportent mutuellement après une intervention difficile est une ressource inestimable pour prévenir de problèmes de santé mental dû surtout à la surcharge de travail. La direction l'a bien compris et encourage activement ces moments en fournissant un espace agréable et en organisant des événements d'équipe comme un petit jardin et une salle de pause.</p>
+            <h2>1.3 - Gestion des conflits</h2>
+            <p>Les conflits internes sont quasi inexistants, tant la dépendance mutuelle impose la coopération. Les tensions proviennent presque toujours de l'extérieur, notamment de la gestion de patients "non-observants" ou agressifs. Ces situations testent les limites du professionnalisme des équipes. Face à un patient verbalement violent ou qui refuse de suivre les protocoles de sécurité, l'entreprise a mis en place une procédure claire. Le technicien a pour consigne de ne jamais entrer dans l'escalade. Il doit rester calme, rappeler factuellement les règles, et si la situation ne s'améliore pas, il a le droit et le devoir de se retirer pour sa propre sécurité. L'incident est immédiatement signalé au responsable technique et à la directrice d'agence. Une médiation est alors tentée, souvent par un appel téléphonique d'un responsable qui a plus de recul. Dans les cas les plus extrêmes, une "visite en binôme" peut être organisée, la présence d'un second technicien ayant souvent un effet dissuasif. Ce qui est crucial, c'est que le technicien n'est jamais laissé seul. De retour à l'agence, un débriefing informel s'organise systématiquement avec les collègues et le supérieur. Ce n'est pas une procédure écrite, mais un réflexe de l'équipe : permettre à celui qui a subi la tension de "vider son sac", de partager son ressenti et d'être rassuré sur le bien-fondé de sa réaction. Ce soutien post-incident est fondamental pour désamorcer le stress et éviter que l'expérience ne devienne un traumatisme.</p>
+            <p>Un technicien m'a raconté le cas d'un patient souffrant d'apnée du sommeil qui disait avoir un problème avec toutes les machines qu’il utilisait. Effectivement, toutes ses machines revenait détruites. En observation à l'hôpital, ils se sont rendus compte qu’il faisait du somnambulisme et qu’il utilisait la PPC comme une faux pour “repousser les sarrasins” d'après ce qu’il disait dans son sommeil.</p>
+        </div>
+
+        <div id="structures_relationnelles" class="page-content">
+            <button class="back-button">&lt; RETOUR_TERMINAL_PRINCIPAL</button>
+            <h1 data-scramble="true">II. Structures relationnelles</h1>
+            <h2>2.1 - Architecture hiérarchique</h2>
+            <p>Le pouvoir décisionnel stratégique est centralisé au siège social à Nice, qui définit les grandes orientations du groupe. Cette centralisation assure une cohérence globale, mais est souvent au détriment de la réalité du terrain. La force de SOS Oxygène réside dans l'importante autonomie qu’ont les agences locales et leurs techniciens. Dans mon agence, la directrice, Mme Alice Mary, n'est pas une simple exécutante. Elle dispose d'une marge de manœuvre considérable pour adapter la stratégie aux réalités du terrain : spécificités géographiques, nature des partenariats avec les hôpitaux locaux, etc.</p>
+            <p>Ce décalage entre les directives nationales et les réalités locales est une source de complexité quotidienne. Par exemple, le siège peut décider de standardiser l'utilisation d'un nouveau modèle de machine à travers tout le réseau pour optimiser les achats. Cependant, cette décision peut s'avérer contre-productive dans une agence comme la nôtre, où une part importante de la patientèle, souvent âgée, est habituée à un modèle plus ancien et plus simple d'utilisation. Le déploiement du nouveau matériel génère alors une vague d'appels de patients désorientés, une augmentation des interventions pour ré-expliquer le fonctionnement et, in fine, une perte de temps considérable pour les équipes. L'agence doit alors développer des stratégies de contournement : maintenir un stock de "sécurité" des anciens modèles, créer ses propres fiches de procédure simplifiées ou encore consacrer plus de temps à la formation des patients, un effort non prévu et donc non valorisé dans les indicateurs de performance dictés par le siège. Cette situation illustre une tension permanente entre la nécessaire standardisation d'un grand groupe et l'indispensable adaptation humaine et locale.</p>
+            <p>L'organigramme formel est pyramidal et clair : la directrice supervise quatre responsables de secteur (médical, technique, administratif, logistique). Cette structure a le mérite de bien délimiter les responsabilités. Cependant, la réalité du quotidien est bien plus fluide. Les interactions entre tous sont permanentes et constituent le véritable moteur de l'organisation.</p>
+            <h2>2.2 - Sociogramme</h2>
+            <p>Si l'on devait dessiner le sociogramme réel de l'agence, il serait bien plus complexe et réticulaire que l'organigramme officiel. Il est basé sur l'expérience et la compétence reconnue. Certains employés, sans position hiérarchique particulière, exercent une influence majeure. Michel, technicien avec quinze ans d'expérience, est la référence technique incontestée. Lorsqu'un problème complexe survient, c'est lui que tout le monde, y compris l'encadrement, consulte spontanément. Son avis fait autorité. De même, Alexandra, au service administratif, possède une connaissance encyclopédique des rouages de la Sécurité Sociale. Elle est la gardienne officieuse des procédures de remboursement et dépanne constamment ses collègues. Ces figures de "sachants" sont des pivots essentiels à la fluidité de l'organisation.</p>
+            <p>L'influence de ces "sachants" va bien au-delà de la simple aide ponctuelle ; elle structure l'organisation du travail de manière informelle mais puissante. J'ai assisté à une scène révélatrice : un nouveau patient, avec une situation administrative complexe impliquant une mutuelle peu connue et des droits à la CMU en cours de renouvellement, risquait de ne pas voir sa prise en charge validée à temps. Le processus standard aurait nécessité de multiples allers-retours avec le siège et la caisse d'assurance maladie, retardant l'installation de l'appareil de plusieurs jours. Face à ce blocage, le responsable administratif s'est tourné non pas vers sa direction, mais vers Alexandra. En moins d'une heure, en s'appuyant sur sa connaissance d'un point de règlement spécifique et en utilisant son contact personnel dans une administration, elle a débloqué la situation. Cet exemple démontre que l'efficacité de l'agence ne repose pas seulement sur ses processus formels, mais aussi sur ce capital de connaissances tacites et de réseaux personnels. Cette structure informelle est à la fois une force incroyable, car elle apporte agilité et solutions sur-mesure, mais aussi une fragilité potentielle : le jour où Sylvie ou Michel partiront, c'est tout un pan de la mémoire et de la compétence de l'agence qui disparaîtra avec eux, un risque que l'organisation formelle peine à anticiper.</p>
+            <h2>2.3 - Systèmes de communication</h2>
+            <p>La communication au sein de l'agence est un modèle d'hybridation entre le numérique et l'humain.</p>
+            <ul>
+                <li><strong>OxyMobile, Oxyweb, Oxydrive :</strong> C'est le système nerveux central des opérations. Cette application mobile est l'outil de travail principal des techniciens, leur permettant de gérer les demandes téléphoniques des clients, de remonter des informations en temps réel et de documenter leurs interventions.</li>
+                <li><strong>Microsoft Outlook :</strong> Il reste l'outil privilégié pour les communications formelles, les échanges avec l'extérieur et la diffusion des notes de service.</li>
+                <li><strong>Vérifications Orales :</strong> Pour toute action critique, la confirmation orale (téléphone ou de vive voix) reste la règle. Cette redondance, qui pourrait sembler inefficace, est en réalité une sécurité indispensable pour prévenir des erreurs aux conséquences potentiellement graves.</li>
+                <li><strong>Réunions mensuelles :</strong> Courtes (une heure maximum) et denses, elles sont le lieu de la communication descendante et ascendante, permettant d'ajuster collectivement les processus en fonction des retours du terrain.</li>
+            </ul>
+            <h2>2.4 - Circulation de l'information</h2>
+            <p>L'information circule majoritairement de manière ascendante, du terrain vers la direction. Chaque intervention saisie dans OxyWeb est une donnée précieuse qui est analysée pour détecter des tendances, anticiper des pannes récurrentes sur un modèle de machine ou identifier des besoins de formation. La traçabilité est une obsession, imposée par la réglementation mais intégrée dans la culture comme un outil d'amélioration continue. Chaque décision, chaque incident est documenté, non pas dans une logique de contrôle, mais dans une optique de partage de connaissances et de prévention.</p>
         </div>
         
-        <!-- ... (Toutes les autres pages de contenu restent identiques) ... -->
-        <div id="introduction" class="page-content">
-    <button class="back-button">&lt; RETOUR_TERMINAL_PRINCIPAL</button>
-    <h1 data-scramble="true">// Introduction</h1>
-    <p>Ce stage chez SOS Oxygène m'a été proposé via une connaissance de ma mère, et je n'en attendais pas grand-chose. Dans mon esprit, il s'agissait d'une entreprise de logistique médicale, un simple maillon dans la chaîne de soins. Je m'imaginais un entrepôt, des livraisons, des processus standardisés que je n’allais pas pouvoir optimiser. La réalité m'a frappé dès le premier jour. J'ai découvert non pas une simple entreprise recherchant le bénéfice, mais un écosystème complexe, un lieu où la dimension humaine prime sur tout le reste. Chaque décision, de la planification d’un envoi de matériel à la configuration d'une machine, est dictée par une finalité unique et non négociable : le bien-être du patient. Cette philosophie, je l'ai tout de suite trouvée admirable, mais ce qui a réellement captivé mon esprit d'ingénieur, que j’ai tout de suite voulu mettre à l'œuvre pour aider cette agence située en plein cœur de Paris.</p>
-    <p>Le secteur des prestations de santé à domicile est très dur. Il est si réglementé que la moindre approximation, la plus petite erreur, peut avoir des conséquences dramatiques sur la santé de quelqu’un. Cette responsabilité écrasante imprègne la culture de l'entreprise et se ressent dans chaque geste. Les machines à pression positive continue (PPC) pour l'apnée du sommeil que manipulent les équipes ne sont pas de simples objets techniques. Pour des centaines de patients souffrant d'insuffisance respiratoire, ce sont littéralement des poumons artificiels, garants de leur sommeil.</p>
-    <p>Dès mon arrivée, j'ai compris que l'organisation reposait sur une interdépendance totale. Le technicien sur le terrain est impuissant si la logistique ne lui prépare pas la bonne machine avec les bons consommables. La logistique, elle, navigue à l'aveugle sans les retours précis des techniciens pour anticiper les stocks ou les pannes. Cette symbiose forcée crée une atmosphère de coopération intense où la communication est reine. Une information mal transmise, un oubli dans la préparation d'un colis, et c'est l'effet domino assuré : un retard, un patient angoissé, un médecin partenaire mécontent, et dans le pire des scénarios, une rupture dans la chaîne de soins vitale.</p>
-    <p>Ce qui semblait être une mécanique bien huilée de l'extérieur s'est révélé être un équilibre précaire, maintenu à bout de bras par la compétence, l'attention et une solidarité sans faille. La complexité réside dans la gestion d'une multitude de variables imprévisibles : l'urgence médicale qui tombe à 2h du matin et que l’on doit gérer dès l’arrivée en agence, la panne technique sur un appareil critique, le problème de livraison dû à un accident, la difficulté relationnelle avec un patient en détresse, les méandres administratifs de la Sécurité Sociale et les réglementations sanitaires en perpétuelle évolution.</p>
-    <p>L'observation de ces dynamiques et mon supérieur, le responsable technique, m'ont orienté vers le rôle crucial, et parfois sous-estimé, des systèmes d'information. La traçabilité des équipements, la gestion des stocks, la planification, le suivi patient : tout repose sur des outils qui doivent être d'une fiabilité absolue. Pourtant, j'ai été surpris de constater que de nombreux processus restaient manuels, chronophages et sources d'erreurs potentielles. C'est dans cette brèche que j'ai trouvé ma place, voyant une opportunité d'appliquer mes compétences pour apporter une contribution concrète à la logistique de l’entreprise.</p>
-    <p>À travers ce rapport, j'aimerais que le lecteur saisisse trois dimensions qui forment l'ADN de SOS Oxygène : l’importance d'une logistique qui doit être à la fois répétitive et ultra-réactive ; la place centrale de la technique et de l'informatique comme piliers de la fiabilité ; et enfin, la richesse des relations humaines qui cimentent l'ensemble et permettent de surmonter les crises. Loin d'être un simple stage technique, cette immersion m'a confronté à des questions éthiques profondes sur la place de la technologie dans le soin et la responsabilité immense qui incombe à une entreprise privée au sein de notre système de santé public.</p>
-</div>
-<div id="organisation_humaine" class="page-content">
-    <button class="back-button">&lt; RETOUR_TERMINAL_PRINCIPAL</button>
-    <h1 data-scramble="true">I. Organisation Humaine</h1>
-    <h2>1.1 La Solidarité au Quotidien</h2>
-    <p>Chez SOS Oxygène, la solidarité n'est pas une ligne dans une charte de valeurs affichée dans l'entrée. C'est une réalité brute. Cette cohésion ne découle pas d'un management directif, mais d'une nécessité opérationnelle évidente. Chaque technicien est sur le terrain, mais il est totalement dépendant de sa base arrière, la logistique, pour recevoir les bon consommables, machines et informations dont le patient a besoin. En retour, la logistique a un besoin vital des "rapports de mission" des techniciens pour ajuster les stocks, anticiper les réparations et retenir les besoins concrets du patient. Cette dépendance mutuelle forge une culture d'entraide constante.</p>
-    <p>Une situation qui revenait souvent était la priorisation des patients et de l’envoi des consommables. Il y a eu durant tout mon stage une rupture de stock d’un masque très fragile; Nous passions donc toutes nos matinées à appeler des patients pour savoir quel autre masque leur donner en attendant. C’était énormément d’adaptation car chaque patient a des demandes différentes, prenant en compte son avis et l’avis de son médecin traitant.</p>
-    <h2>1.2 Les Moments de Convivialité</h2>
-    <p>Les pauses déjeuner sont bien plus qu'une simple coupure. Dans la salle de pause, autour d'une grande table, les frontières hiérarchiques s'estompent. Techniciens, logisticiens, administratifs et parfois même la direction partagent leur repas. On y débriefe les galères du matin, on cherche collectivement des solutions, mais on parle aussi de tout et de rien. Ces moments informels sont le cœur social de l'entreprise. J'étais personnellement au sous-sol, là ou se trouve la logistique, et on venait me chercher pour me sortir de mes tâches pour profiter avec le reste de l’équipe</p>
-    <p>J'ai été frappé de voir que les idées d'amélioration les plus pertinentes  naissaient souvent au cours de ces discussions informelles. Un technicien peut lancer : "Ce serait quand même plus simple si on avait un VPN pour quand on est en télétravail", malheureusement les services informatiques ne suivent pas dans le groupe.</p>
-    <p>Le métier peut être émotionnellement éprouvant. Le soutien psychologique que les collègues apportent mutuellement après une intervention difficile est une ressource inestimable pour prévenir de problèmes de santé mental dû surtout à la surcharge de travail. La direction l'a bien compris et encourage activement ces moments en fournissant un espace agréable et en organisant des événements d'équipe comme un petit jardin et une salle de pause.</p>
-    <h2>1.3 Gestion des Conflits et Résolution des Tensions</h2>
-    <p>Les conflits internes sont quasi inexistants, tant la dépendance mutuelle impose la coopération. Les tensions proviennent presque toujours de l'extérieur, notamment de la gestion de patients "non-observants" ou agressifs. Ces situations testent les limites du professionnalisme des équipes.</p>
-    <p>Un technicien m'a raconté le cas d'un patient souffrant d'apnée du sommeil qui disait avoir un problème avec toutes les machines qu’il utilisait. Effectivement, toutes ses machines revenait détruites. En observation à l'hôpital, ils se sont rendus compte qu’il faisait du somnambulisme et qu’il utilisait la PPC comme une faux pour “repousser les sarrasins” d'après ce qu’il disait dans son sommeil.</p>
-    <h2>1.4 Interview détaillée - Sophie, Technicienne</h2>
-    <div class="interview">
-        <p><strong>Q1 : Qu'est-ce qui te motive le plus dans ton boulot ?</strong></p>
-        <q>Franchement ? C'est le contact avec les gens. Sans hésiter. Tu sais que ce que tu fais, ça sert vraiment à quelque chose, que t'améliores leur confort, et parfois même que tu leur sauves la mise. Chaque machine que j'installe,... ça a un impact direct sur la vie de quelqu'un. J'ai des patients que je suis depuis des années... J'ai vu leur état s'améliorer grâce à nous, et j'ai aussi accompagné des familles dans des moments super durs. Ce côté humain, c'est... ouais, c'est irremplaçable.</q>
-        <p><strong>Q2 : C'est quoi les plus gros problèmes que tu rencontres ?</strong></p>
-        <q>Ah, les galères... (elle rit) C'est les imprévus, toujours. Et certains patients, faut le dire, qui ne sont pas faciles. Tiens, la semaine dernière par exemple, le truc de fou : trois urgences en même temps, dans des arrondissements différents. Un concentrateur qui lâche chez un patient BPCO, un masque de PPC qui irrite un autre, et une livraison en urgence pour une sortie d'hôpital. Là, t'as intérêt à ce que tout soit au top. Heureusement, les collègues ont assuré, ils ont pris des trucs de ma tournée pour que je puisse tout gérer.</q>
-        <p><strong>Q3 : Et l'ambiance dans l'agence, ça se passe comment ?</strong></p>
-        <q>L'ambiance ? C'est une vraie équipe. Les pauses, surtout le dej’, c'est sacré. C'est là qu'on débriefe et qu'on décompresse après une intervention tendue. On se marre bien aussi, heureusement ! Mais le plus important, c'est de savoir que tu peux compter sur les autres. Si j'ai une panne que j'arrive pas à régler, je passe un coup de fil et je sais que quelqu'un va me filer un coup de main. Cette confiance, ça change tout, et je pense que les patient le ressentent.</q>
-        <p><strong>Q4 : Tu as déjà eu un conflit vraiment marquant avec un  patient ou un collègue ?</strong></p>
-        <q>Avec un patient, ouais, ça arrive. Le pire, je crois que c'était un monsieur, la soixantaine, qui ne voulait absolument pas de sa PPC. Il est venu en agence pour se la faire poser et il s’est endormi devant moi en me parlant... Sa femme était désemparée, mais on a discuter pendant une heure ou plus avant que son mari se réveille. Au final, on a commencé par des petites séances, on a testé plusieurs masques... Ça a pris trois mois, trois longs mois, mais maintenant il l'utilise et il va beaucoup mieux.</q>
-        <p><strong>Q5 : Que penses-tu des outils informatiques ?</strong></p>
-        <q>Les outils informatiques ? Ah là là... Au début, honnêtement, on était plusieurs à faire la gueule. Surtout les anciens, habitués au bon vieux papier. On se disait 'encore un truc qui va nous compliquer la vie'. Et puis... ben on a vu le temps qu'on gagnait, et surtout le nombre d'erreurs qu'on évitait. L'appli sur le smartphone, c'est juste génial pour les rapports d'intervention. Et le scanner pour les codes-barres... une révolution ! Fini les prises de tête avec les numéros de série, plus de risque de se planter de machine.</q>
-    </div>
-</div>
-<div id="structure_organisationnelle" class="page-content">
-    <button class="back-button">&lt; RETOUR_TERMINAL_PRINCIPAL</button>
-    <h1 data-scramble="true">II. Structure Organisationnelle et Circulation de l'Information</h1>
-    <h2>2.1 Architecture Hiérarchique</h2>
-    <p>Le pouvoir décisionnel stratégique est centralisé au siège social à Nice, qui définit les grandes orientations du groupe. Cette centralisation assure une cohérence globale, mais est souvent au détriment de la réalité du terrain. La force de SOS Oxygène réside dans l'importante autonomie qu’ont les agences locales et leurs techniciens. Dans mon agence, la directrice, Mme Alice Mary, n'est pas une simple exécutante. Elle dispose d'une marge de manœuvre considérable pour adapter la stratégie aux réalités du terrain : spécificités géographiques, nature des partenariats avec les hôpitaux locaux, etc.</p>
-    <p>L'organigramme formel est pyramidal et clair : la directrice supervise quatre responsables de secteur (médical, technique, administratif, logistique). Cette structure a le mérite de bien délimiter les responsabilités. Cependant, la réalité du quotidien est bien plus fluide. Les interactions entre tous sont permanentes et constituent le véritable moteur de l'organisation.</p>
-    <h2>2.2 Réseaux Informels et Sociogramme</h2>
-    <p>Si l'on devait dessiner le sociogramme réel de l'agence, il serait bien plus complexe et réticulaire que l'organigramme officiel. Il est basé sur l'expérience et la compétence reconnue. Certains employés, sans position hiérarchique particulière, exercent une influence majeure. Michel, technicien avec quinze ans d'expérience, est la référence technique incontestée. Lorsqu'un problème complexe survient, c'est lui que tout le monde, y compris l'encadrement, consulte spontanément. Son avis fait autorité. De même, Sylvie, au service administratif, possède une connaissance encyclopédique des rouages de la Sécurité Sociale. Elle est la gardienne officieuse des procédures de remboursement et dépanne constamment ses collègues. Ces figures de "sachants" sont des pivots essentiels à la fluidité de l'organisation.</p>
-    <h2>2.3 Systèmes de Communication</h2>
-    <p>La communication au sein de l'agence est un modèle d'hybridation entre le numérique et l'humain.</p>
-    <ul>
-        <li><strong>OxyMobile, Oxyweb, Oxydrive :</strong> C'est le système nerveux central des opérations. Cette application mobile est l'outil de travail principal des techniciens, leur permettant de gérer les demandes téléphoniques des clients, de remonter des informations en temps réel et de documenter leurs interventions.</li>
-        <li><strong>Microsoft Outlook :</strong> Il reste l'outil privilégié pour les communications formelles, les échanges avec l'extérieur et la diffusion des notes de service.</li>
-        <li><strong>Vérifications Orales :</strong> Pour toute action critique, la confirmation orale (téléphone ou de vive voix) reste la règle. Cette redondance, qui pourrait sembler inefficace, est en réalité une sécurité indispensable pour prévenir des erreurs aux conséquences potentiellement graves.</li>
-        <li><strong>Réunions mensuelles :</strong> Courtes (une heure maximum) et denses, elles sont le lieu de la communication descendante et ascendante, permettant d'ajuster collectivement les processus en fonction des retours du terrain.</li>
-    </ul>
-    <h2>2.4 Circulation et Traitement de l'Information</h2>
-    <p>L'information circule majoritement de manière ascendante, du terrain vers la direction. Chaque rapport d'intervention saisi dans OxyMobile est une donnée précieuse qui est analysée pour détecter des tendances, anticiper des pannes récurrentes sur un modèle de machine ou identifier des besoins de formation. La traçabilité est une obsession, imposée par la réglementation mais intégrée dans la culture comme un outil d'amélioration continue. Chaque décision, chaque incident est documenté, non pas dans une logique de contrôle, mais dans une optique de partage de connaissances et de prévention.</p>
-</div>
-<div id="gouvernance_management" class="page-content">
-    <button class="back-button">&lt; RETOUR_TERMINAL_PRINCIPAL</button>
-    <h1 data-scramble="true">IV. Gouvernance et Management - Interview Approfondie</h1>
-    <h2>4.1 Vision Stratégique et Leadership : Entretien avec Mme Alice Mary</h2>
-    <p>Mon entretien avec Mme Alice Mary, la directrice de l'agence, a confirmé mes observations. Son management est un alliage rare d'exigence opérationnelle et d'humanisme sincère.</p>
-    <div class="interview">
-        <p><strong>Q1 : Quelle est votre priorité absolue dans la gestion de l'agence au quotidien ?</strong></p>
-        <q>Ma priorité absolue ? Le patient. C'est la seule chose qui compte vraiment, ce n'est même pas négociable. Chaque machine qu'on installe, chaque technicien qui part en intervention... on a la santé des gens entre nos mains. Notre logistique, c'est la colonne vertébrale de tout ça. Un grain de sable dans l'engrenage, et l'impact sur la qualité de vie, voire la survie d'un patient, peut être immédiat. Cette responsabilité, tout le monde la ressent ici, du technicien jusqu'à moi. C'est ce qui nous pousse à être exigeants, mais c'est aussi ce qui donne un sens incroyable à ce qu'on fait.</q>
-        <p><strong>Q2 : Concrètement, comment gérez-vous les situations d'urgence qui sont si fréquentes ?</strong></p>
-        <q>Les urgences... (elle souffle légèrement) C'est notre quotidien. On a beau avoir des protocoles pour tout, chaque urgence est un cas particulier qui demande de l'agilité. La clé, c'est la communication. Le flux d'information en temps réel entre le terrain et le bureau doit être parfait. Quand un patient vous appelle en pleine nuit, en panique parce que son concentrateur d'oxygène est en panne, la seule réponse acceptable est d'être chez lui dans l'heure. Ça demande une organisation militaire, des techniciens d'astreinte qui répondent présents, un stock dédié... et par-dessus tout, une équipe soudée. Dans ces moments-là, la confiance n'est pas une option, elle est vitale.</q>
-        <p><strong>Q3 : Quel rôle l'informatique joue-t-elle  dans votre stratégie ?</strong></p>
-        <q>L'informatique a été une véritable révolution pour nous, il faut être clair. L'application OxyMobile, les automatisations qu'on a mises en place... ça nous a permis de réduire drastiquement le risque d'erreur humaine, d'avoir une traçabilité impeccable et, surtout, de libérer du temps. Un temps précieux que nos techniciens peuvent maintenant consacrer à ce qui compte vraiment : parler avec les patients, les rassurer. Mais attention, je le dis toujours : la technologie doit rester un outil. Elle ne remplacera jamais l'empathie, l'écoute et le professionnalisme de mes équipes.</q>
-        <p><strong>Q4 : Comment encouragez-vous l'innovation au sein des équipes ?</strong></p>
-        <q>L'innovation ? Pour moi, elle vient du terrain. Les meilleures idées, ce sont mes équipes qui les ont, parce qu'elles sont confrontées aux problèmes tous les jours. On a une culture où on écoute tout le monde, peu importe la place dans l'organigramme. Prenez votre exemple : les automatisations que vous avez proposées étaient si pertinentes qu'on les a adoptées sur-le-champ. Ça a même changé la perception de certains qui étaient un peu... 'allergiques' au numérique. Ils ont vu que l'innovation, ça pouvait vraiment simplifier la vie.</q>
-        <p><strong>Q5 : Quelle est votre vision de la culture d'entreprise idéale ?</strong></p>
-        <q>Ce qui fait notre force, notre ADN, c'est l'humain. Bien sûr, il y a une hiérarchie, c'est nécessaire pour que ça tourne. Mais le moteur de cette agence, c'est la collaboration, l'entraide de tous les instants. Ma conviction profonde, c'est qu'on ne peut pas prétendre apporter un service humain de qualité à l'extérieur si on n'a pas cette même humanité en interne. Mes collaborateurs doivent se sentir écoutés, soutenus. C'est un cercle vertueux.</q>
-        <p><strong>Q6 : Quels sont les grands défis que vous anticipez pour le secteur ?</strong></p>
-        <q>Les défis à venir ? Ils sont nombreux. La concurrence devient plus rude, on voit arriver de gros acteurs, avec des approches très industrielles, peut-être moins personnalisées. Notre carte à jouer, c'est justement cette alliance entre l'excellence technique et la qualité de notre service humain. Pour ça, il n'y a pas de secret : il faut continuer à innover et à former nos équipes sans relâche. Et bien sûr, il faut rester agiles pour s'adapter à des réglementations qui changent tout le temps et à l'évolution des pathologies liées au vieillissement de la population.</q>
-    </div>
-</div>
-<div id="innovation_technologique" class="page-content">
-    <button class="back-button">&lt; RETOUR_TERMINAL_PRINCIPAL</button>
-    <h1 data-scramble="true">V. Innovation Technologique et Transformation Numérique</h1>
-    <h2>5.1 Mes Contributions aux Systèmes d'Information</h2>
-    <p>Mon rôle durant ce stage a été de me positionner comme un facilitateur technique. Mes contributions, bien que ciblées, ont eu un impact mesurable sur l'efficacité quotidienne.</p>
-    <ul>
-        <li><strong>Automatisation du Suivi des Machines :</strong> Le suivi des mouvements de matériel était une tâche manuelle, fastidieuse et source d'erreurs. J'ai développé un système automatisé basé sur la lecture de codes-barres. Concrètement, j'ai codé un script en Python utilisant la bibliothèque pandas pour traiter les exports et mettre à jour la base de données. Résultat : une réduction de 80% du temps alloué à cette tâche et une quasi-élimination des erreurs.</li>
-        <li><strong>Optimisation de la Gestion des Compteurs :</strong> Le relevé manuel des compteurs d'heures des appareils était une autre source de perte de temps. J'ai mis en place un processus de saisie et de traitement automatisé qui a transformé cette corvée en un processus fiable et rapide.</li>
-        <li><strong>Intégration d'un Système de Scanner :</strong> L'introduction de la lecture optique a été une petite révolution. J'ai non seulement développé l'interface, mais j'ai surtout accompagné le changement en organisant des mini-ateliers de 15 minutes avec chaque technicien pour les familiariser avec l'outil. L'adoption a été un succès immédiat.</li>
-    </ul>
-    <h2>5.2 Enjeux de Sécurité Informatique</h2>
-    <p>Mon audit informel a révélé des vulnérabilités typiques d'une PME en croissance : quelques postes fonctionnant encore sous des OS obsolètes, un réseau Wi-Fi avec des ports ouverts inutilement, et une sensibilisation insuffisante des utilisateurs aux risques de phishing. J'ai rédigé une note de synthèse avec des recommandations pragmatiques (plan de mise à jour, durcissement de la configuration réseau, mini-formation aux bonnes pratiques) qui a été prise très au sérieux par la direction, consciente des enjeux critiques liés à la protection des données de santé.</p>
-    <h2>5.3 Impact de la Transformation Numérique sur les Métiers</h2>
-    <p>L'introduction de ces outils a eu des effets profonds. Les techniciens ont gagné en autonomie et passent moins de temps sur des tâches administratives. Les logisticiens, libérés des saisies manuelles, peuvent se concentrer sur des missions à plus forte valeur ajoutée comme l'analyse prédictive des stocks. La relation client elle-même s'est améliorée, avec une traçabilité en temps réel qui permet une réactivité accrue.</p>
-</div>
-<div id="apprentissages_personnels" class="page-content">
-    <button class="back-button">&lt; RETOUR_TERMINAL_PRINCIPAL</button>
-    <h1 data-scramble="true">VI. Apprentissages Personnels et Développement Professionnel</h1>
-    <h2>6.1 Compétences Relationnelles et Management</h2>
-    <p>Ce stage a été une école de "soft skills". J'ai appris à adapter mon discours technique à des interlocuteurs non-initiés. J'ai développé des stratégies pour convaincre et accompagner le changement, en comprenant que la meilleure solution technique est inutile si elle n'est pas adoptée par les utilisateurs. Je suis arrivé en pensant que la logique et les faits suffisaient ; je repars en sachant que l'écoute, l'empathie et la pédagogie sont tout aussi importantes.</p>
-    <h2>6.2 Maîtrise Technique et Polyvalence Informatique</h2>
-    <p>J'ai pu appliquer concrètement un large éventail de compétences : Python pour l'automatisation, C++ pour des optimisations, PHP/HTML/JS pour des interfaces web, et SQL pour la manipulation des données. Mais l'apprentissage principal a été de développer des solutions non pas dans un cadre académique, mais dans un environnement de production avec ses contraintes de compatibilité, de robustesse et de facilité de maintenance.</p>
-    <h2>6.3 Compréhension de l'Entreprise et de ses Enjeux</h2>
-    <p>Je suis passé d'une vision en silo, centrée sur l'informatique, à une approche systémique de l'entreprise. J'ai compris les interactions complexes entre les différents services, les pressions externes (réglementaires, concurrentielles) et les enjeux internes (RH, stratégie). Travailler dans un domaine où l'erreur est proscrite m'a inculqué un sens des responsabilités et une rigueur qui me serviront toute ma vie.</p>
-</div>
-<div id="conclusion" class="page-content">
-    <button class="back-button">&lt; RETOUR_TERMINAL_PRINCIPAL</button>
-    <h1 data-scramble="true">// Conclusion</h1>
-    <p>Cette expérience chez SOS Oxygène a été bien plus qu'un simple stage de validation de cursus. Ce fut une véritable leçon de vie, professionnelle et humaine. La découverte la plus marquante reste la puissance d'une culture d'entreprise fondée sur le respect, la solidarité et le service d'une cause qui dépasse les individus. Voir des équipes s'investir avec une telle abnégation pour améliorer la qualité de vie de personnes qu'elles ne connaissent parfois que par leur pathologie est un modèle inspirant.</p>
-    <p>Cette dimension éthique du travail, souvent absente des discours purement techniques, s'est révélée être un formidable moteur de performance et de satisfaction. Elle a profondément influencé ma propre réflexion sur ma future carrière : comment puis-je mettre mes compétences techniques au service de projets porteurs de sens ?</p>
-    <p>Concrètement, j'ai appris à traduire des problèmes opérationnels complexes en solutions informatiques simples et efficaces. Cette confrontation au réel transforme radicalement la perception de l'ingénierie : elle n'est pas une discipline abstraite, mais un outil puissant pour améliorer le quotidien des gens et, dans ce cas précis, la qualité des soins.</p>
-    <p>L'impact de ce stage est durable. Les outils que j'ai développés  sont toujours en service, mais l'impact le plus significatif est peut-être d'avoir contribué, à mon échelle, à faire évoluer les mentalités sur le potentiel de l'innovation numérique. Cette expérience a forgé en moi une conviction : la réussite d'une transformation technologique repose moins sur la technologie elle-même que sur l'intelligence humaine et organisationnelle avec laquelle on l'intègre. C'est cette approche humaniste de l'innovation qui, j'en suis certain, guidera mon parcours professionnel futur.</p>
-</div>
+        <div id="cycle_vie_machines" class="page-content">
+            <button class="back-button">&lt; RETOUR_TERMINAL_PRINCIPAL</button>
+            <h1 data-scramble="true">III. Cycle de vie des machines</h1>
+            <h2>3.1 - Processus d’intégration</h2>
+            <p>L'arrivée d'une nouvelle machine est tout un rituel. Elle doit recevoir trois étiquettes : une d'interdiction de débranchement (sécurité), une d'identification de l'agence, et une avec un numéro de série interne (lien avec la base de données). J'ai vécu un incident révélateur : suite à une mise à jour informatique mal maîtrisée, la configuration du logiciel d'impression a été effacée. Du jour au lendemain, plus aucune étiquette ne sortait, paralysant l'intégration de tout le nouveau matériel. J'ai senti une goutte de sueur froide en comprenant que sans ces bouts de papier, la chaîne était rompue. Dans l'urgence, j'ai dû mémoriser la disposition exacte de chaque champ et recréer manuellement toute la configuration. Cette expérience m'a appris, de manière très concrète, l'importance critique de la documentation des processus et de la sauvegarde des configurations.</p>
+            <h2>3.2 - Déploiement et improvisation</h2>
+            <p>Le déploiement d’une machine, un appareil PPC (à pression positive continue), illustre parfaitement les défis du terrain. Un rendez-vous, fixé à 14h, décalé en urgence par la famille, entraîne un changement qui aurait pu faire s'écrouler tout le planning de l'après-midi du technicien. Mais grâce à la flexibilité des équipes et à une communication instantanée, non seulement la machine peut être livrée dans le nouveau créneau, mais la tournée a été réorganisée à la volée pour optimiser les déplacements. Cela m’a enseigné trois leçons clés : l'anticipation (toujours avoir un plan B), la priorisation (distinguer l'urgent de l'important) et l'improvisation maîtrisée.</p>
+            <h2>3.3 - Complexité du SAV</h2>
+            <p>Une machine doit être envoyée en réparation pour une panne mineure, elle est revenue du SAV externe avec un diagnostic alarmant révélant cinq autres problèmes. Le rapport du SAV est tombé, et nous a fait réfléchir. Après une petite enquête, il s'est avéré que les pannes étaient réelles, probablement dues à des conditions d'utilisation extrêmes chez le patient précédent.</p>
+            <p><strong>C'est ici que l'analyse des données biométriques, comme celles vues sur l'écran d'accueil, prend tout son sens.</strong> En croisant l'historique de la machine avec les données de sommeil du patient (télétransmises par la machine elle-même), nous aurions pu corréler les pannes à un IAH très élevé. Une telle analyse aurait immédiatement déclenché une alerte logistique, non pas pour une simple réparation, mais pour une investigation complète de l'appareil et une possible mise à niveau vers un modèle plus robuste pour ce type de pathologie. Cet incident a mis en lumière la nécessité d'une traçabilité absolue et a conduit à la mise en place d'un protocole renforcé : photos systématiques avant envoi, tests complets au retour, et documentation détaillée de l'historique de chaque appareil, enrichie des données patient critiques.</p>
+            <p>La gestion du parc de machines en service après-vente représente un véritable casse-tête logistique et humain. Lorsqu'un appareil part en réparation, il entre dans une sorte de "limbes" administratifs. Il reste la propriété de l'entreprise mais devient un actif indisponible, ce qui exerce une pression constante sur le stock de machines de remplacement. Le logisticien doit alors jongler avec un parc matériel virtuellement réduit. La procédure est lourde : il faut documenter méticuleusement la panne, emballer l'appareil de manière sécurisée, organiser le transport, puis suivre son parcours chez le réparateur externe, ce qui implique des relances téléphoniques fréquentes pour connaître l'avancement et la date de retour estimée. Pendant ce temps, il faut gérer l'impatience légitime du patient, lui fournir un appareil de prêt équivalent, et s'assurer que la transition se fasse sans rupture de traitement. Multiplié par des dizaines d'appareils, ce processus devient une tâche de fond chronophage qui exige une rigueur sans faille et d'excellentes compétences en communication pour gérer les attentes des patients et la pression des délais.</p>
+            <h2>3.4 - Remise en circulation et fin de vie</h2>
+            <p>Après sa réparation complète, une machine a subi un protocole de remise en service : nouveau cycle d'étiquetage, tests de pression, désinfection selon les normes hospitalières et mise à jour de son "carnet de santé" numérique sur Oxyweb et Oxymobile. Cette rigueur, qui peut sembler excessive, est la clé pour garantir la sécurité et la fiabilité. La gestion de la fin de vie est tout aussi structurée. L'entreprise a une approche RSE (Responsabilité Sociétale des Entreprises) très volontariste, démontrant qu'une entreprise privée peut intégrer avec succès des préoccupations de santé et de développement durable avec son tri sélectif.</p>
+        </div>
+
+        <div id="innovation_numerique" class="page-content">
+            <button class="back-button">&lt; RETOUR_TERMINAL_PRINCIPAL</button>
+            <h1 data-scramble="true">V. Innovation numérique</h1>
+            <h2>5.1 - Mes contributions</h2>
+            <p>Mon rôle durant ce stage, en plus de la gestion de la logistique, a été de me positionner comme un facilitateur technique. Mes contributions, bien que ciblées, ont eu un impact mesurable sur l'efficacité quotidienne.</p>
+            <ul>
+                <li><strong>Automatisation du suivi des machines :</strong> Le suivi des mouvements de matériel était une tâche manuelle, fastidieuse et source d'erreurs. J'ai développé un système automatisé basé sur la lecture de codes-barres. Concrètement, j'ai codé un script en Python utilisant la bibliothèque pandas pour traiter les exports et mettre à jour la base de données. Résultat : une réduction de 80% du temps alloué à cette tâche et une quasi-élimination des erreurs.</li>
+                <li><strong>Optimisation de la Gestion des Compteurs :</strong> Le relevé manuel des compteurs d'heures des appareils était une autre source de perte de temps. J'ai mis en place un processus de saisie et de traitement automatisé qui a transformé cette corvée en un processus fiable et rapide.</li>
+                <li><strong>Intégration d'un système de scanner :</strong> L'introduction de la lecture optique a été un point de prise de tête. J'ai non seulement développé l'interface, mais j'ai surtout accompagné le changement, avant d’abandonner l’idée car je n’avais pas assez d’accès aux bases de données.</li>
+            </ul>
+            <h2>5.2 - Sécurité informatique</h2>
+            <p>Mon audit informel mais autorisé a révélé des vulnérabilités typiques d'une agence en croissance : quelques postes fonctionnant encore sous des OS obsolètes, un réseau Wi-Fi avec des ports ouverts inutilement, et une sensibilisation insuffisante des utilisateurs aux risques de phishing. J'ai longuement discuté de certaines recommandations  (plan de mise à jour, durcissement de la configuration réseau, mini-formation aux bonnes pratiques) qui ont été prises au sérieux, conscients des enjeux critiques liés à la protection des données de santé.</p>
+            <h2>5.3 - Impact sur les métiers</h2>
+            <p>L'introduction de ces outils a eu des effets profonds. Les techniciens ont gagné en autonomie et passent moins de temps sur des tâches administratives. Les logisticiens, libérés des saisies manuelles, peuvent se concentrer sur des missions à plus forte valeur ajoutée comme l'analyse prédictive des stocks. La relation client elle-même s'est améliorée, avec une traçabilité en temps réel qui permet une réactivité accrue. Cependant, cette transformation ne s'est pas faite sans heurts et a mis en lumière la dimension profondément humaine de la conduite du changement. Lors de l'introduction du système de scanner, j'ai fait face à une résistance passive mais palpable. Pour certains techniciens plus anciens, habitués depuis des années à leurs fiches papier, cet outil était perçu non pas comme une aide, mais comme une complication, voire un instrument de "flicage". Des remarques comme "On a toujours fait comme ça et ça marchait très bien" ou "Encore un truc informatique qui va tomber en panne" étaient fréquentes. J'ai compris que présenter les seuls avantages techniques ne suffirait pas. J'ai donc changé d'approche : au lieu de formations de groupe, j'ai passé du temps avec chaque sceptique individuellement, non pas pour leur "apprendre" à utiliser l'outil, mais pour l'utiliser avec eux sur leurs propres tâches. En leur montrant concrètement que le bip du scanner remplaçait dix minutes de saisie manuelle fastidieuse à la fin de leur journée, j'ai transformé la perception de l'outil. Il est passé du statut de contrainte à celui d'allié. Cette expérience a été une leçon essentielle : l'adoption d'une nouvelle technologie est moins une question d'ergonomie de l'interface que de psychologie de l'utilisateur.</p>
+        </div>
+
+        <div id="personnel_professionnel" class="page-content">
+            <button class="back-button">&lt; RETOUR_TERMINAL_PRINCIPAL</button>
+            <h1 data-scramble="true">VI. Personnel et professionnel</h1>
+            <h2>6.1 - Compétences relationnelles</h2>
+            <p>Ce stage a été une école de "soft skills". J'ai appris à adapter mon discours technique à des interlocuteurs non-initiés. J'ai développé des stratégies pour convaincre et accompagner le changement, en comprenant que la meilleure solution technique est inutile si elle n'est pas adoptée par les utilisateurs. Je suis arrivé en pensant que la logique et les faits suffisaient ; je repars en sachant que l'écoute, l'empathie et la pédagogie sont tout aussi importantes.</p>
+            <h2>6.2 - Polyvalence technique et informatique</h2>
+            <p>J'ai pu appliquer concrètement un large éventail de compétences : Python pour l'automatisation, C++ pour des logiciels, PHP/HTML/JS pour des interfaces web, et SQL pour la manipulation des données. Mais l'apprentissage principal a été de développer des solutions non pas dans un cadre académique, mais dans un environnement de production avec ses contraintes de compatibilité, de robustesse et de facilité de maintenance.</p>
+            <h2>6.3 - Compréhension des enjeux de l’entreprise</h2>
+            <p>Je suis passé d'une vision en silo, centrée sur l'informatique, à une approche systémique de l'entreprise. J'ai compris les interactions complexes entre les différents services, les pressions externes (réglementaires, concurrentielles) et les enjeux internes (RH, stratégie). Travailler dans un domaine où l'erreur est proscrite m'a inculqué un sens des responsabilités et une rigueur qui me serviront toute ma vie. De plus, j'ai saisi la tension économique fondamentale qui régit ce secteur. D'un côté, une exigence de qualité de soin absolue qui pousse à investir dans les meilleures machines, les consommables les plus confortables et à allouer du temps humain pour chaque patient. De l'autre, un cadre de remboursement par la Sécurité Sociale qui est forfaitaire et strictement réglementé. Chaque action, chaque choix de matériel, chaque minute passée est donc soumise à un arbitrage implicite entre la qualité du soin et la viabilité économique de l'agence. J'ai compris que la performance ne se mesurait pas seulement en satisfaction patient ou en fiabilité technique, mais aussi en capacité à optimiser les processus pour rester rentable tout en maintenant ce très haut niveau d'exigence. Cette dualité m'a fait prendre conscience que l'ingénieur en informatique, dans ce contexte, n'est pas seulement un créateur d'outils, mais un acteur direct de cet équilibre précaire, où chaque ligne de code peut contribuer soit à alourdir les coûts, soit à dégager de précieuses marges de manœuvre pour le soin.</p>
+        </div>
+        
+        <div id="conclusion" class="page-content">
+            <button class="back-button">&lt; RETOUR_TERMINAL_PRINCIPAL</button>
+            <h1 data-scramble="true">// Conclusion</h1>
+            <p>Cette expérience chez SOS Oxygène a été bien plus qu'un simple stage de validation de cursus. Ce fut une véritable leçon de vie, professionnelle et humaine. La découverte la plus marquante reste la puissance d'une culture d'entreprise fondée sur le respect, la solidarité et le service d'une cause qui dépasse les individus. Voir des équipes s'investir avec une telle abnégation pour améliorer la qualité de vie de personnes qu'elles ne connaissent parfois que par leur pathologie est un modèle inspirant.</p>
+            <p>Cette dimension éthique du travail, souvent absente des discours purement techniques, s'est révélée être un formidable moteur de performance et de satisfaction. Elle a profondément influencé ma propre réflexion sur ma future carrière : comment puis-je mettre mes compétences techniques au service de projets porteurs de sens ?</p>
+            <p>Concrètement, j'ai appris à traduire des problèmes opérationnels complexes en solutions informatiques simples et efficaces. Cette confrontation au réel transforme radicalement la perception de l'ingénierie : elle n'est pas une discipline abstraite, mais un outil puissant pour améliorer le quotidien des gens et, dans ce cas précis, la qualité des soins.</p>
+            <p>L'impact de ce stage est durable. Les outils que j'ai développés sont toujours en service, mais l'impact le plus significatif est peut-être d'avoir contribué, à mon échelle, à faire évoluer les mentalités sur le potentiel de l'innovation numérique. Cette expérience a forgé en moi une conviction : la réussite d'une transformation technologique repose moins sur la technologie elle-même que sur l'intelligence humaine et organisationnelle avec laquelle on l'intègre. C'est cette approche humaniste de l'innovation qui, j'en suis certain, guidera mon parcours professionnel futur.</p>
+        </div>
+
+        <div id="annexes" class="page-content">
+            <button class="back-button">&lt; RETOUR_TERMINAL_PRINCIPAL</button>
+            <h1 data-scramble="true">// Annexes</h1>
+            <h2>A.1 - Point de vue d’une technicienne</h2>
+            <div class="interview">
+                <p>J'ai pu discuter un bon moment avec Sophie, une technicienne qui a 5 ans d’expérience dans l’agence. Son discours est direct, ancré dans le réel, et on sent immédiatement la passion qu'elle a pour son métier, malgré les difficultés.</p>
+                <p><strong>Q1 : Qu'est-ce qui te motive le plus dans ton boulot ?</strong></p>
+                <q>Franchement ? C'est le contact avec les gens. Sans hésiter une seule seconde. Tu sais que ce que tu fais, ça sert vraiment à quelque chose, que t'améliores leur confort, et parfois même que tu leur sauves la mise. Chaque machine que j'installe, chaque réglage que je fais... ça a un impact direct sur la nuit et la journée de quelqu'un. J'ai des patients que je suis depuis des années... Je les ai vus arriver essoufflés au moindre effort, et maintenant ils peuvent à nouveau jouer avec leurs petits-enfants. J'ai aussi accompagné des familles dans des moments super durs, en fin de vie... On devient un repère pour eux. Ce côté humain, cette confiance qu'ils te donnent... ouais, c'est irremplaçable. C'est ce qui te fait repartir le lendemain, même quand t'as eu une journée pourrie.</q>
+                <p><strong>Q2 : C'est quoi les plus gros problèmes que tu rencontres au quotidien ?</strong></p>
+                <q>Ah, les galères... (elle rit franchement) C'est les imprévus, toujours. La théorie, c'est bien joli, mais le terrain, c'est le chaos maîtrisé. Et certains patients, faut le dire, qui ne sont pas faciles, parce qu'ils sont angoissés ou qu'ils ont mal. Tiens, la semaine dernière par exemple, le truc de fou : trois urgences qui tombent en même temps, entre midi et deux, dans des arrondissements complètement opposés. Un réservoir d'oxygène liquide qui lâche chez un patient sous haute dépendance, un masque de PPC qui provoque une grosse irritation chez un autre qui ne le supporte plus, et une sortie d'hôpital non prévue à gérer en urgence. Là, t'as une montée d'adrénaline et t'as intérêt à ce que toute la chaîne suive derrière. Heureusement, à l'agence, les collègues ont assuré, ils ont appelé d'autres patients pour décaler des rendez-vous non urgents, ils ont pris des trucs de ma tournée pour que je puisse me concentrer sur ces trois cas. C'est ça, notre quotidien.</q>
+                <p><strong>Q3 : Et l'ambiance dans l'agence, ça se passe comment ?</strong></p>
+                <q>L'ambiance ? C'est une vraie famille, sincèrement. On se voit plus entre nous qu'on ne voit nos proches, alors autant bien s'entendre ! Les pauses, surtout le dej’, c'est sacré. C'est le moment où on lâche tout. C'est là qu'on débriefe une intervention tendue, qu'on demande conseil, et qu'on décompresse. On se marre bien aussi, heureusement ! Mais le plus important, c'est de savoir que tu peux compter sur les autres. Si j'ai une panne sur un concentrateur que je n'ai jamais vue, je passe un coup de fil à Michel, notre ancien, et je sais qu'en deux minutes il va me trouver la solution. Cette confiance, ça n'a pas de prix. Quand t'es seule chez un patient, à 18h, et que tu galères, savoir que t'as ce soutien derrière, ça change tout. Et je pense sincèrement que les patients le ressentent, qu'ils voient qu'on n'est pas juste des livreurs, mais une équipe soudée qui s'occupe d'eux.</q>
+                <p><strong>Q4 : Que penses-tu des outils informatiques que vous utilisez ?</strong></p>
+                <q>Les outils informatiques ? Ah là là... (elle soupire et lève les yeux au ciel) C'est notre bête noire à tous. Ça nous prend un temps de dingue, un temps qu'on ne passe pas avec les patients. Le problème, c'est que ça n’a pas du tout été pensé pour nous, pour le terrain. Ça se voit que les gens qui ont créé ça n'ont jamais mis les pieds chez un patient. Tu dois te connecter à OxyMobile pour ton rapport, mais pour vérifier le stock d'un consommable, c'est sur IMD, et pour une info patient, c'est encore un autre portail. Tu passes ton temps à jongler entre les applications. Et je te parle pas de l'appli sur le terrain... Tu saisis toutes tes infos, et hop, tout disparaît. C'est arrivé à tout le monde. Alors tu finis par tout noter sur un bout de papier, et tu dois tout ressaisir le soir en rentrant à l'agence. C'est une perte de temps monumentale et une source d'erreurs. On rêve tous d'un outil unique, simple, qui marche même sans connexion et qui se synchronise dès qu'il le peut. Un truc fait pour nous, quoi.</q>
+            </div>
+            <h2>A.2 - Vision stratégique et leadership</h2>
+            <div class="interview">
+                <p>Mon entretien avec Mme Alice Mary, la directrice de l'agence, a confirmé et mis en perspective mes observations. Son management est un équilibre subtil entre une exigence opérationnelle de tous les instants et une profonde humanité, considérant ses équipes comme son atout le plus précieux.</p>
+                <p><strong>Q1 : Quelle est votre priorité absolue dans la gestion de l'agence au quotidien ?</strong></p>
+                <q>Ma priorité absolue ? Le patient. Il n'y a même pas de débat. C'est la seule chose qui compte vraiment, ce n'est même pas négociable. Chaque machine qu'on installe, chaque technicien qui part en intervention... on a la santé des gens entre nos mains. Notre logistique, c'est la colonne vertébrale de tout ça. Un pépin dans l'engrenage, et l'impact sur la qualité de vie, voire la survie d'un patient, peut être immédiat. Cette responsabilité, tout le monde la ressent ici, à chaque instant. C'est une pression, bien sûr, mais c'est surtout une immense fierté. C'est ce qui nous pousse à être exigeants les uns envers les autres, à ne jamais nous contenter de "l'à-peu-près". Mais c'est aussi ce qui donne un sens incroyable à ce qu'on fait, ce qui nous fait nous lever le matin avec la conviction d'être utiles. Chaque merci d'une famille soulagée, chaque sourire d'un patient qui respire mieux, c'est notre véritable paie.</q>
+                <p><strong>Q2 : Concrètement, comment gérez-vous les situations d'urgence qui sont si fréquentes ?</strong></p>
+                <q>Les urgences... (elle souffle légèrement, un geste qui trahit l'habitude) C'est notre quotidien. On a beau avoir des protocoles pour tout, chaque urgence est un cas particulier qui demande de l'agilité et un sang-froid à toute épreuve. La clé, c'est la communication. Le flux d'information en temps réel entre le terrain et le bureau doit être parfait, limpide. Quand un patient vous appelle en pleine nuit, en panique parce que sa PPC est en panne, la seule réponse acceptable est d'avoir un technicien chez lui dans l'heure. Ça demande une organisation militaire : des techniciens d'astreinte qui non seulement répondent présents, mais qui sont aussi psychologiquement préparés à gérer le stress du patient et de sa famille. Ça veut dire un logisticien qui peut préparer un kit d'urgence en pleine nuit si besoin. On travaille aussi en lien direct avec les services d'urgence des hôpitaux pour coordonner les sorties. Et par-dessus tout, il y a cette équipe soudée. Chacun doit savoir exactement ce qu'il a à faire, et avoir une confiance aveugle en son collègue. C'est cette synergie qui nous permet de transformer une situation potentiellement dramatique en un problème technique rapidement résolu.</q>
+                <p><strong>Q3 : Quel rôle l'informatique joue-t-elle dans milieu ?</strong></p>
+                <q>L'informatique... c'est notre plus grand allié et parfois notre pire ennemi. Soyons clairs, on ne pourrait absolument plus travailler sans. La traçabilité que ça nous offre est une sécurité indispensable, pour le patient comme pour nous d'un point de vue légal. Le problème, ce n'est pas le principe, c'est l'application. On se perd avec la multiplication des sites et des logiciels qui ne communiquent pas entre eux. Mes équipes passent un temps fou à jongler entre trois, quatre interfaces différentes. Un technicien va saisir une information sur OxyMobile, mais il doit ressaisir les informations à la main sur OxyWeb, ce qui obligera le service administratif à faire des recherches et des corrections manuelles. Chaque correction, c'est du temps, de l'argent, et un risque d'erreur. On sent que ces outils ont été conçus individuellement, par des services différents au niveau du groupe.</q>
+                <p><strong>Q5 : Quelle est votre vision de la culture d'entreprise idéale ?</strong></p>
+                <q>Ce qui fait notre force, notre ADN, c'est l'humain. Bien sûr, il y a une hiérarchie, une structure, c'est nécessaire pour que l'organisation tourne rond. Mais le véritable moteur de cette agence, c'est la collaboration, l'entraide de tous les instants. C'est le technicien qui, après sa journée, appelle un collègue pour savoir s'il a réussi à dépanner ce patient difficile. C'est la coordinatrice qui prend le temps de débriefer avec un technicien après une intervention stressante. Ma conviction profonde, c'est qu'on ne peut pas prétendre apporter un service humain de qualité à l'extérieur si on n'a pas cette même humanité en interne. Mes collaborateurs doivent se sentir écoutés, soutenus, valorisés dans leurs compétences. C'est un cercle vertueux : un personnel heureux et épanoui, c'est l'assurance d'avoir des patients satisfaits et bien pris en charge. C'est aussi simple et aussi compliqué que ça.</q>
+            </div>
+            <h2>A.3 - Logiciel</h2>
+            <p>Voici une photo du logiciel d’optimisation</p>
+            <img src="logiciel.png" alt="Logiciel d'optimisation">
+        </div>
 
     </div>
 
     <footer class="interface-footer">
-        <span class="footer-text">> STATUT_CONNEXION: SÉCURISÉE [27354-carac RREX]</span>
+        <span class="footer-text">> STATUT_CONNEXION: SÉCURISÉE [26536-carac RREX]</span>
         <span class="footer-text" id="footer-biometrie"><span class="heartbeat">-/\/\/\-</span> BIOMÉTRIE PATIENT: STABLE</span>
     </footer>
 
@@ -530,16 +426,20 @@
                 canvas.getContext('2d').scale(dpr, dpr);
             };
 
-            const drawHistogram = () => {
+            // Histogramme dynamique selon la progression
+            const drawHistogram = (progress = 1) => {
                 setupCanvas(histogramCanvas);
                 const w = histogramCanvas.clientWidth;
                 const h = histogramCanvas.clientHeight;
                 histogramCtx.clearRect(0,0,w,h);
                 histogramCtx.fillStyle = 'var(--alert-red)';
                 apneaEvents.forEach(event => {
-                    const x = (event.start / TOTAL_POINTS) * w;
-                    const barWidth = (event.duration / TOTAL_POINTS) * w;
-                    histogramCtx.fillRect(x, 0, barWidth, h);
+                    // Affiche seulement les événements "scannés"
+                    if ((event.start / TOTAL_POINTS) <= progress) {
+                        const x = (event.start / TOTAL_POINTS) * w;
+                        const barWidth = (event.duration / TOTAL_POINTS) * w;
+                        histogramCtx.fillRect(x, 0, barWidth, h);
+                    }
                 });
             };
 
@@ -556,14 +456,13 @@
                 });
 
                 const hoursScanned = SIMULATION_HOURS * progress;
-                const iah = hoursScanned > 0 ? eventsDetected  / hoursScanned : 0;
-                
+                // Multiplie l'IAH par 100
+                const iah = hoursScanned > 0 ? (eventsDetected / hoursScanned) * 100 : 0;
                 iahValueEl.textContent = iah.toFixed(1);
                 apneaCountEl.textContent = eventsDetected;
-                // Simuler durée en secondes (ex: 2 points = 1 seconde)
                 apneaDurationEl.textContent = `${Math.round(maxDuration/2)}s`;
 
-                if(iah > 30) { // Seuil pour apnée sévère
+                if(iah > 3000) { // Seuil adapté à la nouvelle échelle
                     iahValueEl.classList.add('glowing-text-red');
                 } else {
                     iahValueEl.classList.remove('glowing-text-red');
@@ -613,7 +512,9 @@
                     graphCtx.beginPath(); graphCtx.moveTo(currentX, 0); graphCtx.lineTo(currentX, h);
                     graphCtx.strokeStyle = 'rgba(0, 255, 255, 0.5)'; graphCtx.lineWidth = 2; graphCtx.stroke();
                     
-                    updateAnalytics(currentX / w);
+                    const progress = currentX / w;
+                    updateAnalytics(progress);
+                    drawHistogram(progress);
                     currentX += animationSpeed;
                     if (currentX > w) { currentX = 0; }
                     
