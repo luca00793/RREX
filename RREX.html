@@ -80,8 +80,19 @@
         .interview strong { color: var(--text-light); }
         .back-button { display: inline-block; margin-bottom: 30px; padding: 10px 20px; background: transparent; border: 1px solid var(--primary-blue); color: var(--primary-blue); font-family: 'Share Tech Mono', monospace; cursor: pointer; transition: background-color 0.3s, color 0.3s; text-transform: uppercase; }
         .back-button:hover { background-color: var(--primary-blue); color: var(--background-dark); box-shadow: 0 0 10px var(--glow-blue); }
+        
         #preloader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--background-dark); z-index: 1000; display: flex; justify-content: center; align-items: center; color: var(--primary-blue); font-size: 1.2em; flex-direction: column; }
         #preloader-text { overflow: hidden; white-space: nowrap; border-right: .15em solid var(--primary-blue); animation: typing 3.5s steps(40, end), blink-caret .75s step-end infinite; }
+
+        .logiciel-img {
+            display: block;
+            max-width: 400px;
+            width: 100%;
+            height: auto;
+            margin: 24px auto;
+            border-radius: 12px;
+            box-shadow: 0 0 16px var(--glow-blue);
+        }
         
         /* --- BLOC RESPONSIVE DESIGN --- */
         @media (max-width: 1024px) {
@@ -349,7 +360,7 @@
             </div>
             <h2>A.3 - Logiciel</h2>
             <p>Voici une photo du logiciel d’optimisation</p>
-            <img src="./logiciel.jpeg" alt="Logiciel d'optimisation">
+            <img src="./logiciel.jpeg" alt="Logiciel d'optimisation" class="logiciel-img">
         </div>
 
     </div>
